@@ -45,12 +45,12 @@ SINGLELINECOM	("//".[\n\r])
 
 %%
 
-"/*"					{inicom = linhacount; comfim = 0; BEGIN(MULTILINECOM);}
-<MULTILINECOM>	"*/"	{comfim = 1; inicom = 0; BEGIN 0;}
-<MULTILINECOM>	\n		{linhacount+=1;colcount=1;}
-<MULTILINECOM>	.		{colcount+=1;}
+"/*"				{inicom = linhacount; comfim = 0; BEGIN(MULTILINECOM);}
+<MULTILINECOM>"*/"	{comfim = 1; inicom = 0; BEGIN 0;}
+<MULTILINECOM>\n	{linhacount+=1;colcount=1;}
+<MULTILINECOM>.		{colcount+=1;}
 
-{SINGLELINECOM}			{linhacount+=1;colcount=yyleng;}
+{SINGLELINECOM}		{linhacount+=1;colcount=yyleng;}
 
 [\n\r]			{linhacount+=1; colcount = 1;}
 " "				{colcount+=yyleng;}
