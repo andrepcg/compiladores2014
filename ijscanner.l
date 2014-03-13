@@ -5,6 +5,11 @@
 	int inicom = 0;
 %}
 
+%x	MULTILINECOM
+IniCom		"/*"
+FimCom		"*/"
+SINGLELINECOM	("//".*\n)
+
 BOOLLIT		true|false
 INT			int
 BOOL		boolean
@@ -36,19 +41,18 @@ ASSIGN		"="
 SEMIC		";"
 COMMA		","
 
-RESERVED	abstract|assert|break|byte|case|catch|char|continue|default|double|do|enum|extends|final|finally|float|for|implements|import|instanceof|interface|long|native|new|null|package|private|protected|return|short|static|strictfp|super|switch|synchronized|this|throw|throws|transient|try|void|volatile
+RESERVED	abstract|assert|break|byte|case|catch|char|continue|default|double|do|enum|extends|final|finally|float|for|implements|import|instanceof|interface|long|native|null|package|private|protected|short|strictfp|super|switch|synchronized|this|throw|throws|transient|try|volatile
 
-ID		([a-z]|[A-Z]|"_"|"&")([a-z]|[A-Z]|"_"|"&"|[0-9])*
-INTLIT	(([1-9][0-9]*)|0)|("0x"([0-9])|0)
+ID ([a-z]|[A-Z]|"_")([a-z]|[A-Z]|"_"|[0-9])*
 
-SINGLELINECOM	("//".[\n\r])
+INTLIT		(([1-9][0-9]*)|0)|(0[xX][0-9a-fA-F]+)
 
-%x	MULTILINECOM
+
 
 %%
 
-"/*"				{inicom = linhacount; comfim = 0; BEGIN(MULTILINECOM);}
-<MULTILINECOM>"*/"	{comfim = 1; inicom = 0; BEGIN 0;}
+{IniCom}		{inicom = linhacount; comfim = 0; BEGIN(MULTILINECOM);}
+<MULTILINECOM>{FimCom}	{comfim = 1; inicom = 0; BEGIN 0;}
 <MULTILINECOM>\n	{linhacount+=1;colcount=1;}
 <MULTILINECOM>.		{colcount+=1;}
 
@@ -57,6 +61,8 @@ SINGLELINECOM	("//".[\n\r])
 [\n\r]			{linhacount+=1; colcount = 1;}
 " "				{colcount+=yyleng;}
 \t				{colcount+=yyleng;}
+
+{RESERVED}		{colcount+=yyleng; printf("RESERVED\n");}
 
 {BOOLLIT}		{colcount+=yyleng; printf("BOOLLIT\n");}
 {INT}			{colcount+=yyleng; printf("INT\n");}
