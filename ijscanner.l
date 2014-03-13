@@ -5,7 +5,7 @@
 	int inicom = 0;
 %}
 
-BOOLLIT		("true"|"false")
+BOOLLIT		true|false
 INT			int
 BOOL		boolean
 NEW			new
@@ -35,6 +35,8 @@ NOT			"!"
 ASSIGN		"="
 SEMIC		";"
 COMMA		","
+
+RESERVED	abstract|assert|break|byte|case|catch|char|continue|default|double|do|enum|extends|final|finally|float|for|implements|import|instanceof|interface|long|native|new|null|package|private|protected|return|short|static|strictfp|super|switch|synchronized|this|throw|throws|transient|try|void|volatile
 
 ID		([a-z]|[A-Z]|"_"|"&")([a-z]|[A-Z]|"_"|"&"|[0-9])*
 INTLIT	(([1-9][0-9]*)|0)|("0x"([0-9])|0)
