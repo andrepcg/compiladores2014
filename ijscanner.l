@@ -43,8 +43,7 @@ COMMA		","
 
 RESERVED	abstract|assert|break|byte|case|catch|char|continue|default|double|do|enum|extends|final|finally|float|for|implements|import|instanceof|interface|long|native|null|package|private|protected|short|strictfp|super|switch|synchronized|this|throw|throws|transient|try|volatile
 
-ID ([a-z]|[A-Z]|"_")([a-z]|[A-Z]|"_"|[0-9])*
-
+ID			([a-zA-Z]|"_"|"$")([a-zA-Z]|"_"|"$"|[0-9])*
 INTLIT		(([1-9][0-9]*)|0)|(0[xX][0-9a-fA-F]+)
 
 
@@ -62,9 +61,9 @@ INTLIT		(([1-9][0-9]*)|0)|(0[xX][0-9a-fA-F]+)
 " "				{colcount+=yyleng;}
 \t				{colcount+=yyleng;}
 
-{RESERVED}		{colcount+=yyleng; printf("RESERVED\n");}
+{RESERVED}		{colcount+=yyleng; printf("RESERVED(%s)\n",yytext);}
 
-{BOOLLIT}		{colcount+=yyleng; printf("BOOLLIT\n");}
+{BOOLLIT}		{colcount+=yyleng; printf("BOOLLIT(%s)\n",yytext);}
 {INT}			{colcount+=yyleng; printf("INT\n");}
 {BOOL}			{colcount+=yyleng; printf("BOOL\n");}
 {NEW}			{colcount+=yyleng; printf("NEW\n");}
@@ -86,10 +85,10 @@ INTLIT		(([1-9][0-9]*)|0)|(0[xX][0-9a-fA-F]+)
 {CBRACE}		{colcount+=yyleng; printf("CBRACE\n");}
 {OSQUARE}		{colcount+=yyleng; printf("OSQUARE\n");}
 {CSQUARE}		{colcount+=yyleng; printf("CSQUARE\n");}
-{OP1}			{colcount+=yyleng; printf("OP1\n");}
-{OP2}			{colcount+=yyleng; printf("OP2\n");}
-{OP3}			{colcount+=yyleng; printf("OP3\n");}
-{OP4}			{colcount+=yyleng; printf("OP4\n");}
+{OP1}			{colcount+=yyleng; printf("OP1(%s)\n",yytext);}
+{OP2}			{colcount+=yyleng; printf("OP2(%s)\n",yytext);}
+{OP3}			{colcount+=yyleng; printf("OP3(%s)\n",yytext);}
+{OP4}			{colcount+=yyleng; printf("OP4(%s)\n",yytext);}
 {NOT}			{colcount+=yyleng; printf("NOT\n");}
 {ASSIGN}		{colcount+=yyleng; printf("ASSIGN\n");}
 {SEMIC}			{colcount+=yyleng; printf("SEMIC\n");}
