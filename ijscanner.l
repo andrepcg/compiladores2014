@@ -8,7 +8,7 @@
 %x	MULTILINECOM
 IniCom		"/*"
 FimCom		"*/"
-SINGLELINECOM	("//".*\n)
+SINGLELINECOM	(\/\/)(.)*
 
 BOOLLIT		true|false
 INT			int
@@ -63,7 +63,7 @@ INTLIT		(([1-9][0-9]*)|0)|(0[xX][0-9a-fA-F]+)
 
 {RESERVED}		{colcount+=yyleng; printf("RESERVED(%s)\n",yytext);}
 
-{BOOLLIT}		{colcount+=yyleng; printf("BOOLLIT(%s)\n",yytext);}
+true|false		{colcount+=yyleng; printf("BOOLLIT(%s)\n",yytext);}
 {INT}			{colcount+=yyleng; printf("INT\n");}
 {BOOL}			{colcount+=yyleng; printf("BOOL\n");}
 {NEW}			{colcount+=yyleng; printf("NEW\n");}
@@ -97,7 +97,7 @@ INTLIT		(([1-9][0-9]*)|0)|(0[xX][0-9a-fA-F]+)
 {ID}		{colcount+=yyleng; printf("ID(%s)\n",yytext);}
 {INTLIT}	{colcount+=yyleng; printf("INTLIT(%s)\n", yytext);}
 
-.	{printf("Line %d, col %d: illegal character ('%s')\n",linhacount,colcount,yytext);colcount++;}
+.			{colcount+=yyleng;printf("Line %d, col %d: illegal character ('%c')\n", linhacount, colcount, yytext[0]);}
 %%
 
 int main()
