@@ -1,102 +1,115 @@
 %{
-int col=1;
-int line=1;
-int comm_col=0;
-int comm_line=0;
+	int linhacount = 1;
+	int colcount = 1;
+	int colCom = 0;
+	int comfim = 0;
+	int inicom = 0;
 %}
-%X COMMENT
-%%
-"true"|"false"				{ col += yyleng; printf("BOOLLIT(%s)\n",yytext);}
-"int"						{ col += yyleng; printf("INT\n");}
-"boolean"					{ col += yyleng; printf("BOOL\n");}
-"new"						{ col += yyleng; printf("NEW\n");}
-"if"						{ col += yyleng; printf("IF\n");}
-"else"						{ col += yyleng; printf("ELSE\n");}	
-"while"						{ col += yyleng; printf("WHILE\n");}
-"System.out.println"		{ col += yyleng; printf("PRINT\n");}
-"Integer.parseInt"			{ col += yyleng; printf("PARSEINT\n");}
-"class"						{ col += yyleng; printf("CLASS\n");}
-"public"					{ col += yyleng; printf("PUBLIC\n");}
-"static"					{ col += yyleng; printf("STATIC\n");}
-"void"						{ col += yyleng; printf("VOID\n");}
-"String"					{ col += yyleng; printf("STRING\n");}
-".length"					{ col += yyleng; printf("DOTLENGTH\n");}
-"return"					{ col += yyleng; printf("RETURN\n");}
-"("							{ col += yyleng; printf("OCURV\n");}
-")"							{ col += yyleng; printf("CCURV\n");}
-"{"							{ col += yyleng; printf("OBRACE\n");}
-"}"							{ col += yyleng; printf("CBRACE\n");}
-"["							{ col += yyleng; printf("OSQUARE\n");}
-"]"							{ col += yyleng; printf("CSQUARE\n");}
-"&&"|"||"					{ col += yyleng; printf("OP1(%s)\n",yytext);}
-"<"|">"|"=="|"!="|"<="|">="	{ col += yyleng; printf("OP2(%s)\n",yytext);}
-"+"|"-"						{ col += yyleng; printf("OP3(%s)\n",yytext);}
-"*"|"/"|"%"					{ col += yyleng; printf("OP4(%s)\n",yytext);}
-"!"							{ col += yyleng; printf("NOT\n");}
-"="							{ col += yyleng; printf("ASSIGN\n");}
-";"							{ col += yyleng; printf("SEMIC\n");}
-","							{ col += yyleng; printf("COMMA\n");}
-"abstract"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"continue"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }	
-"for"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"switch"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"assert"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"default"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"goto"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"package"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"synchronized"				{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"do"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"private"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"this"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"break"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"double"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"implements"				{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"protected"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"throw"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"byte"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"import"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"throws"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"case"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"enum"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"instanceof"				{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"transient"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"catch"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"extends"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"short"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"try"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"char"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"final"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"interface"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"finally"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"long"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"strictfp"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"volatile"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"const"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"float"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"native"					{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"super"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-"null"						{ col += yyleng; printf("RESERVED(%s)\n",yytext); }
-[a-zA-Z_$][a-zA-Z_$0-9]*			{ col += yyleng; printf("ID(%s)\n",yytext); }
-0x[0-9a-fA-F]+|	[0-9]+				{ col += yyleng; printf("INTLIT(%s)\n",yytext); }
-"//".*						{ ;} 
-"/*"						{ BEGIN COMMENT; comm_col = col; comm_line=line;}
-<COMMENT>.					{ col +=yyleng; }
-<COMMENT>"\n"					{ line++;col=1;}
-<COMMENT><<EOF>>				{ printf("Line %d, col %d: unterminated comment\n",comm_line,comm_col); return 0;}
-<COMMENT>"*/"					{ BEGIN 0; col +=2; }
 
-"\n"						{ col =1; line+=1; }
-[ \t\f\r]					{ col +=yyleng; }
-<<EOF>> 					{ col +=yyleng; yyterminate(); }
+%x	MULTILINECOM
+IniCom		"/*"
+FimCom		"*/"
+SINGLELINECOM	"//".*
 
-.							{printf("Line %d, col %d: illegal character('%c')\n", line, col, yytext[0]); col+=yyleng; }
+BOOLLIT		true|false
+INT			int
+BOOL		boolean
+NEW			new
+IF			if
+ELSE		else
+WHILE		while
+PRINT		"System.out.println"
+PARSEINT	"Integer.parseInt"
+CLASS		class
+PUBLIC		public
+STATIC		static
+VOID		void
+STRING		String
+DOTLENGTH	".length"
+RETURN		return
+OCURV		"("
+CCURV		")"
+OBRACE		"{"
+CBRACE		"}"
+OSQUARE		"["
+CSQUARE		"]"
+OP1			("&&"|"||")
+OP2			("<"|">"|"=="|"!="|"<="|">=")
+OP3			("+"|"-")
+OP4			("*"|"/"|"%")
+NOT			"!"
+ASSIGN		"="
+SEMIC		";"
+COMMA		","
+
+RESERVED	abstract|assert|break|byte|case|catch|char|continue|default|double|do|enum|extends|final|finally|float|for|implements|import|instanceof|interface|long|native|null|package|private|protected|short|strictfp|super|switch|synchronized|this|throw|throws|transient|try|volatile
+
+ID			[a-zA-Z_$][a-zA-Z_$0-9]*
+INTLIT		([0-9]+)|(0x[0-9a-fA-F]+)
+
+
 %%
+
+{IniCom}		{inicom = linhacount; colCom = colcount; comfim = 0; BEGIN MULTILINECOM;}
+<MULTILINECOM>{FimCom}	{comfim = 1; inicom = 0; BEGIN 0;}
+<MULTILINECOM>\n	{linhacount+=1;colcount+=2;}
+<MULTILINECOM><<EOF>>	{ printf("Line %d, col %d: unterminated comment\n",inicom,colCom); return 0;}
+<MULTILINECOM>.		{colcount+=yyleng;}
+
+{SINGLELINECOM}		{;}
+
+\n			{linhacount+=1; colcount = 1;}
+[ \t\f\r]		{colcount+=yyleng;}
+
+{RESERVED}		{colcount+=yyleng; printf("RESERVED(%s)\n",yytext);}
+
+"true"|"false"		{colcount+=yyleng; printf("BOOLLIT(%s)\n",yytext);}
+{INT}			{colcount+=yyleng; printf("INT\n");}
+{BOOL}			{colcount+=yyleng; printf("BOOL\n");}
+{NEW}			{colcount+=yyleng; printf("NEW\n");}
+{IF}			{colcount+=yyleng; printf("IF\n");}
+{ELSE}			{colcount+=yyleng; printf("ELSE\n");}
+{WHILE}			{colcount+=yyleng; printf("WHILE\n");}
+{PRINT}			{colcount+=yyleng; printf("PRINT\n");}
+{PARSEINT}		{colcount+=yyleng; printf("PARSEINT\n");}
+{CLASS}			{colcount+=yyleng; printf("CLASS\n");}
+{PUBLIC}		{colcount+=yyleng; printf("PUBLIC\n");}
+{STATIC}		{colcount+=yyleng; printf("STATIC\n");}
+{VOID}			{colcount+=yyleng; printf("VOID\n");}
+{STRING}		{colcount+=yyleng; printf("STRING\n");}
+{DOTLENGTH}		{colcount+=yyleng; printf("DOTLENGTH\n");}
+{RETURN}		{colcount+=yyleng; printf("RETURN\n");}
+{OCURV}			{colcount+=yyleng; printf("OCURV\n");}
+{CCURV}			{colcount+=yyleng; printf("CCURV\n");}
+{OBRACE}		{colcount+=yyleng; printf("OBRACE\n");}
+{CBRACE}		{colcount+=yyleng; printf("CBRACE\n");}
+{OSQUARE}		{colcount+=yyleng; printf("OSQUARE\n");}
+{CSQUARE}		{colcount+=yyleng; printf("CSQUARE\n");}
+{OP1}			{colcount+=yyleng; printf("OP1(%s)\n",yytext);}
+{OP2}			{colcount+=yyleng; printf("OP2(%s)\n",yytext);}
+{OP3}			{colcount+=yyleng; printf("OP3(%s)\n",yytext);}
+{OP4}			{colcount+=yyleng; printf("OP4(%s)\n",yytext);}
+{NOT}			{colcount+=yyleng; printf("NOT\n");}
+{ASSIGN}		{colcount+=yyleng; printf("ASSIGN\n");}
+{SEMIC}			{colcount+=yyleng; printf("SEMIC\n");}
+{COMMA}			{colcount+=yyleng; printf("COMMA\n");}
+
+{ID}		{colcount+=yyleng; printf("ID(%s)\n",yytext);}
+{INTLIT}	{colcount+=yyleng; printf("INTLIT(%s)\n", yytext);}
+
+<<EOF>>		{colcount+= yyleng; yyterminate();}
+
+.			{printf("Line %d, col %d: illegal character ('%c')\n", linhacount, colcount, yytext[0]); colcount+=yyleng;}
+%%
+
 int main()
 {
-yylex();
+	yylex();
+
+	return 0;
 }
 
 int yywrap()
 {
-return 1;
+	return 1;
 }
