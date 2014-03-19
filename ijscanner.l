@@ -56,11 +56,6 @@ INTLIT		([0-9]+)|(0x[0-9a-fA-F]+)
 <MULTILINECOM><<EOF>>	{ printf("Line %d, col %d: unterminated comment\n",inicom,colCom); return 0;}
 <MULTILINECOM>.		{colcount+=yyleng;}
 
-{SINGLELINECOM}		{;}
-
-\n			{linhacount+=1; colcount = 1;}
-[ \t\f\r]		{colcount+=yyleng;}
-
 {RESERVED}		{colcount+=yyleng; printf("RESERVED(%s)\n",yytext);}
 
 "true"|"false"		{colcount+=yyleng; printf("BOOLLIT(%s)\n",yytext);}
@@ -96,6 +91,11 @@ INTLIT		([0-9]+)|(0x[0-9a-fA-F]+)
 
 {ID}		{colcount+=yyleng; printf("ID(%s)\n",yytext);}
 {INTLIT}	{colcount+=yyleng; printf("INTLIT(%s)\n", yytext);}
+
+{SINGLELINECOM}		{;}
+
+\n			{linhacount+=1; colcount = 1;}
+[ \t\f\r]		{colcount+=yyleng;}
 
 <<EOF>>		{colcount+= yyleng; yyterminate();}
 
