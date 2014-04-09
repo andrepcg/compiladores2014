@@ -2,8 +2,8 @@
 	int linhacount = 1;
 	int colcount = 1;
 	int colCom = 0;
-	int comfim = 0;
-	int inicom = 0;
+	int linhaCom = 0;
+
 %}
 
 %x	MULTILINECOM
@@ -42,23 +42,15 @@ ASSIGN		"="
 SEMIC		";"
 COMMA		","
 
-RESERVED	abstract|assert|break|byte|case|catch|char|continue|default|double|do|enum|extends|final|finally|float|for|implements|import|instanceof|interface|long|native|null|package|private|protected|short|strictfp|super|switch|synchronized|this|throw|throws|transient|try|volatile
+RESERVED	abstract|continue|for|switch|assert|default|goto|package|synchronized|do|private|this|break|double|implements|protected|throw|byte|import|throws|case|enum|instanceof|transient|catch|extends|short|try|char|final|interface|finally|long|strictfp|volatile|const|float|native|super|null
 
 ID			[a-zA-Z_$][a-zA-Z_$0-9]*
-INTLIT		([0-9]+)|(0x[0-9a-fA-F]+)
+INTLIT		[0-9]+|0x[0-9a-fA-F]+
 
 
 %%
 
-{IniCom}		{inicom = linhacount; colCom = colcount; comfim = 0; BEGIN MULTILINECOM;}
-<MULTILINECOM>{FimCom}	{comfim = 1; inicom = 0; BEGIN 0;}
-<MULTILINECOM>\n	{linhacount+=1;colcount+=2;}
-<MULTILINECOM><<EOF>>	{ printf("Line %d, col %d: unterminated comment\n",inicom,colCom); return 0;}
-<MULTILINECOM>.		{colcount+=yyleng;}
-
-{RESERVED}		{colcount+=yyleng; printf("RESERVED(%s)\n",yytext);}
-
-"true"|"false"		{colcount+=yyleng; printf("BOOLLIT(%s)\n",yytext);}
+{BOOLLIT}		{colcount+=yyleng; printf("BOOLLIT(%s)\n",yytext);}
 {INT}			{colcount+=yyleng; printf("INT\n");}
 {BOOL}			{colcount+=yyleng; printf("BOOL\n");}
 {NEW}			{colcount+=yyleng; printf("NEW\n");}
@@ -89,15 +81,23 @@ INTLIT		([0-9]+)|(0x[0-9a-fA-F]+)
 {SEMIC}			{colcount+=yyleng; printf("SEMIC\n");}
 {COMMA}			{colcount+=yyleng; printf("COMMA\n");}
 
-{ID}		{colcount+=yyleng; printf("ID(%s)\n",yytext);}
-{INTLIT}	{colcount+=yyleng; printf("INTLIT(%s)\n", yytext);}
+{RESERVED}		{colcount+=yyleng; printf("RESERVED(%s)\n",yytext);}
+
+{ID}			{colcount+=yyleng; printf("ID(%s)\n",yytext);}
+{INTLIT}		{colcount+=yyleng; printf("INTLIT(%s)\n", yytext);}
 
 {SINGLELINECOM}		{;}
 
-\n			{linhacount+=1; colcount = 1;}
-[ \t\f\r]		{colcount+=yyleng;}
+{IniCom}					{colCom = colcount; linhaCom=linhacount; BEGIN MULTILINECOM;}
+<MULTILINECOM>.				{colcount +=yyleng; }
+<MULTILINECOM>"\n"			{linhacount++;colcount=1;}
+<MULTILINECOM><<EOF>>		{printf("Line %d, col %d: unterminated comment\n",linhaCom,colCom); return 0;}
+<MULTILINECOM>{FimCom}		{colcount +=2; BEGIN 0;  }
 
-<<EOF>>		{colcount+= yyleng; yyterminate();}
+\n							{colcount = 1; linhacount++; }
+[ \t\f\r]					{colcount +=yyleng; }
+<<EOF>> 					{colcount +=yyleng; yyterminate(); }
+
 
 .			{printf("Line %d, col %d: illegal character ('%c')\n", linhacount, colcount, yytext[0]); colcount+=yyleng;}
 %%
