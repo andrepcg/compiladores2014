@@ -3,11 +3,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "structures.h"
-#include "functions.h"
-#include "shows.h"
-#include "symbol_table.h"
-
 extern int linhacount;
 extern int colcount;
 extern int yyleng;
@@ -18,24 +13,11 @@ int yydebug=0;
 void yyerror(char *s);
 int yylex(void);
 
-is_node *myProgram;
-prog_env *myProgramSemantic;
 %}
 
 
 %token RESERVED COMMA BOOL INT ID INTLIT IF ELSE WHILE RETURN PRINT BOOLLIT NEW PARSEINT PUBLIC STATIC VOID 
 %token CLASS OCURV CCURV OBRACE CBRACE OSQUARE CSQUARE OP1 OP2 OP3 OP4 NOT ASSIGN SEMIC STRING DOTLENGTH
-
-%token <valorInteiro> INTLIT
-%token <valorID> ID
-
-%type <node> 
-
-%union{
-	int valorInteiro;
-	char* valorID;
-	is_node *node;
-}
 
 %right ASSIGN
 %left OP1 
@@ -77,10 +59,13 @@ field_decl
 	
 method_decl
 	:	PUBLIC STATIC type_void ID OCURV CCURV OBRACE 
-	|	PUBLIC STATIC type_void ID OCURV formal_params OBRACE CBRACE
-	|	PUBLIC STATIC type_void ID OCURV formal_params OBRACE var_decl statement CBRACE
-	|	PUBLIC STATIC type_void ID OCURV formal_params OBRACE var_decl CBRACE
-	|	PUBLIC STATIC type_void ID OCURV formal_params OBRACE statement CBRACE
+	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE CBRACE
+	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_state CBRACE
+	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE var_decl CBRACE
+	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE statement CBRACE
+	|	PUBLIC STATIC type_void ID OCURV CCURV OBRACE multi_var_state CBRACE
+	|	PUBLIC STATIC type_void ID OCURV CCURV OBRACE statement CBRACE
+	|	PUBLIC STATIC type_void ID OCURV CCURV OBRACE var_decl CBRACE
 	;
 	
 type_void
@@ -89,7 +74,8 @@ type_void
 	;
 
 formal_params
-	:	type ID comma_type_id_multi
+	:	type ID
+	|	type ID comma_type_id_multi
 	|	STRING OSQUARE CSQUARE ID
 	;
 	
@@ -99,7 +85,18 @@ comma_type_id_multi
 	;
 	
 type
-	:	int_bool square_multi
+	:	int_bool
+	|	int_bool square_multi
+	;
+	
+multi_var_state
+	:	var_state
+	|	multi_var_state var_state
+	;
+	
+var_state
+	:	var_decl
+	|	statement
 	;
 	
 square_multi
@@ -128,8 +125,8 @@ statement
 	|	IF OCURV expr CCURV statement ELSE statement
 	|	WHILE OCURV expr CCURV statement
 	|	PRINT OCURV expr CCURV SEMIC
-	|	ID ASSING expr SEMIC
-	|	ID OSQUARE espr CSQUARE ASSING expr SEMIC
+	|	ID ASSIGN expr SEMIC
+	|	ID OSQUARE expr CSQUARE ASSIGN expr SEMIC
 	|	RETURN SEMIC
 	|	RETURN expr SEMIC
 	;
@@ -142,9 +139,7 @@ statement_multi
 expr
 	: 	expr op_or expr
 	|	expr OSQUARE expr CSQUARE
-	|	ID
-	|	INTLIT
-	|	BOOLLIT
+	|	id_int_bool
 	|	NEW int_bool OSQUARE expr CSQUARE
 	|	OCURV expr CCURV
 	|	expr DOTLENGTH expr
@@ -152,6 +147,12 @@ expr
 	|	PARSEINT OCURV ID OSQUARE expr CSQUARE CCURV
 	|	ID OCURV CCURV
 	|	ID OCURV args CCURV
+	;
+	
+id_int_bool
+	:	ID
+	|	INTLIT
+	|	BOOLLIT
 	;
 
 args
@@ -180,29 +181,6 @@ op_or
 %%
 
 int main(){
-	/*
-	int i, show_tree = 0, show_semantic=0;
-	
-	if(yyparse()==0){
-		for(i=0; i<argc; i++){
-			if(strcmp(argv[i], "-t") == 0){
-				show_tree = 1;
-			} else if(strcmp(argv[i], "-s") == 0) {
-				show_semantic = 1;
-			}
-
-		}
-
-		if(show_tree == 1){
-			printf("Program\n");
-			show_program(myProgram, 1);
-		} 
-		if( show_semantic == 1){
-			show_program_semantic(myProgramSemantic->global);
-			show_program_semantic_procedures(myProgramSemantic->procs);
-		}
-	}
-	*/
 	yyparse();
 	return 0;
 }
