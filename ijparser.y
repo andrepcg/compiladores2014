@@ -1,36 +1,41 @@
 %{
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
 #include "structures.h"
 #include "functions.h"
 #include "shows.h"
-#include <stdio.h>
+#include "symbol_table.h"
 
 extern int linhacount;
 extern int colcount;
+extern int yyleng;
 extern char *yytext;
+
 int yydebug=0;
+
 void yyerror(char *s);
+int yylex(void);
+
+is_node *myProgram;
+prog_env *myProgramSemantic;
 %}
 
+
+%token RESERVED COMMA BOOL INT ID INTLIT IF ELSE WHILE RETURN PRINT BOOLLIT NEW PARSEINT PUBLIC STATIC VOID 
+%token CLASS OCURV CCURV OBRACE CBRACE OSQUARE CSQUARE OP1 OP2 OP3 OP4 NOT ASSIGN SEMIC STRING DOTLENGTH
+
+%token <valorInteiro> INTLIT
+%token <valorID> ID
+
+%type <node> 
+
 %union{
-	is_expression_list* iel;
-	is_expression* ie;
-	is_infix_expression* iie;
-	is_unary_expression* iue;
-	int num;
+	int valorInteiro;
+	char* valorID;
+	is_node *node;
 }
-
-%type<iel>statement
-%type<ie>expression
-%type<iie>infix_expression
-%type<iue>unary_expression
-
-%token RESERVED
-%token COMMA
-%token BOOL INT
-%token ID INTLIT
-%token IF ELSE WHILE RETURN PRINT
-%token OCURV CCURV OBRACE CBRACE OSQUARE CSQUARE OP1 OP2 OP3 OP4 NOT ASSIGN SEMIC
-
 
 %right ASSIGN
 %left OP1 
@@ -44,39 +49,6 @@ void yyerror(char *s);
 %nonassoc IF ELSE
 
 %start start
-
-/*
-BOOLLIT		true|false
-INT			int
-BOOL		boolean
-NEW			new
-IF			if
-ELSE		else
-WHILE		while
-PRINT		"System.out.println"
-PARSEINT	"Integer.parseInt"
-CLASS		class
-PUBLIC		public
-STATIC		static
-VOID		void
-STRING		String
-DOTLENGTH	".length"
-RETURN		return
-OCURV		"("
-CCURV		")"
-OBRACE		"{"
-CBRACE		"}"
-OSQUARE		"["
-CSQUARE		"]"
-OP1			("&&"|"||")
-OP2			("<"|">"|"=="|"!="|"<="|">=")
-OP3			("+"|"-")
-OP4			("*"|"/"|"%")
-NOT			"!"
-ASSIGN		"="
-SEMIC		";"
-COMMA		","
-*/
 
 %% 
 
@@ -203,51 +175,44 @@ op_or
 	|	OP3
 	|	OP4
 	;
-	
-	
-	// ESTA PARTE EM BAIXO É DO ANO PASSADO
-expression
-	: 	expression ASSIGN expression	{$$=insert_infix_expression($1, is_ASSIGN, $3);}
-	|	expression AND expression		{$$=insert_infix_expression($1, is_AND, $3);}
-	|	expression OR expression		{$$=insert_infix_expression($1, is_OR, $3);}
-	|	expression EQ expression		{$$=insert_infix_expression($1, is_EQ, $3);}
-	|	expression NE expression		{$$=insert_infix_expression($1, is_NE, $3);}
-	|	expression LT expression		{$$=insert_infix_expression($1, is_LT, $3);}
-	|	expression GT expression		{$$=insert_infix_expression($1, is_GT, $3);}
-	|	expression LE expression		{$$=insert_infix_expression($1, is_LE, $3);}
-	|	expression GE expression		{$$=insert_infix_expression($1, is_GE, $3);}
-	|	expression PLUS expression		{$$=insert_infix_expression($1, is_PLUS, $3);}
-	|	expression MINUS expression		{$$=insert_infix_expression($1, is_MINUS, $3);}
-	|	expression AST expression		{$$=insert_infix_expression($1, is_AST, $3);}
-	|	expression DIV expression		{$$=insert_infix_expression($1, is_DIV, $3);}
-	|	expression MOD expression		{$$=insert_infix_expression($1, is_MOD, $3);}
-	|	AMP expression
-	|	AST expression
-	|	PLUS expression
-	|	MINUS expression
-	|	NOT expression
-	|	expression LSQ expression RSQ
-	|	ID LPAR RPAR
-	|	ID LPAR expression RPAR
-	|	ID LPAR expression comma_expression RPAR
-	|	PRINTF LPAR expression RPAR
-	|	ATOI LPAR expression RPAR
-	|	ITOA LPAR expression COMMA expression RPAR
-	|	ID
-	|	INTLIT
-	|	CHRLIT
-	|	STRLIT
-	|	LPAR expression RPAR
-	;
 
 	
 %%
 
 int main(){
+	/*
+	int i, show_tree = 0, show_semantic=0;
+	
+	if(yyparse()==0){
+		for(i=0; i<argc; i++){
+			if(strcmp(argv[i], "-t") == 0){
+				show_tree = 1;
+			} else if(strcmp(argv[i], "-s") == 0) {
+				show_semantic = 1;
+			}
+
+		}
+
+		if(show_tree == 1){
+			printf("Program\n");
+			show_program(myProgram, 1);
+		} 
+		if( show_semantic == 1){
+			show_program_semantic(myProgramSemantic->global);
+			show_program_semantic_procedures(myProgramSemantic->procs);
+		}
+	}
+	*/
 	yyparse();
 	return 0;
 }
 
 void yyerror(char *s) {
+	colcount -= yyleng;
+
+	if(strcmp(yytext, "") == 0){
+		colcount++;
+	}
+	
 	printf ("Line %d, col %d: %s: %s\n", linhacount, colcount, s, yytext);
 }
