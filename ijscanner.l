@@ -1,12 +1,22 @@
+%x	MULTILINECOM
+
 %{
+	#include <string.h>
+	#include <stdlib.h>
+	#include <stdio.h>
+	#include <ctype.h>
+	#include "y.tab.h"
+
 	int linhacount = 1;
 	int colcount = 1;
 	int colCom = 0;
 	int linhaCom = 0;
+	
+	extern int yylval;
 
 %}
 
-%x	MULTILINECOM
+
 IniCom		"/*"
 FimCom		"*/"
 SINGLELINECOM	"//".*
@@ -42,7 +52,7 @@ ASSIGN		"="
 SEMIC		";"
 COMMA		","
 
-RESERVED	abstract|continue|for|switch|assert|default|goto|package|synchronized|do|private|this|break|double|implements|protected|throw|byte|import|throws|case|enum|instanceof|transient|catch|extends|short|try|char|final|interface|finally|long|strictfp|volatile|const|float|native|super|null
+RESERVED	"++"|"--"|abstract|continue|for|switch|assert|default|goto|package|synchronized|do|private|this|break|double|implements|protected|throw|byte|import|throws|case|enum|instanceof|transient|catch|extends|short|try|char|final|interface|finally|long|strictfp|volatile|const|float|native|super|null
 
 ID			[a-zA-Z_$][a-zA-Z_$0-9]*
 INTLIT		[0-9]+|0x[0-9a-fA-F]+
@@ -50,41 +60,41 @@ INTLIT		[0-9]+|0x[0-9a-fA-F]+
 
 %%
 
-{BOOLLIT}		{colcount+=yyleng; printf("BOOLLIT(%s)\n",yytext);}
-{INT}			{colcount+=yyleng; printf("INT\n");}
-{BOOL}			{colcount+=yyleng; printf("BOOL\n");}
-{NEW}			{colcount+=yyleng; printf("NEW\n");}
-{IF}			{colcount+=yyleng; printf("IF\n");}
-{ELSE}			{colcount+=yyleng; printf("ELSE\n");}
-{WHILE}			{colcount+=yyleng; printf("WHILE\n");}
-{PRINT}			{colcount+=yyleng; printf("PRINT\n");}
-{PARSEINT}		{colcount+=yyleng; printf("PARSEINT\n");}
-{CLASS}			{colcount+=yyleng; printf("CLASS\n");}
-{PUBLIC}		{colcount+=yyleng; printf("PUBLIC\n");}
-{STATIC}		{colcount+=yyleng; printf("STATIC\n");}
-{VOID}			{colcount+=yyleng; printf("VOID\n");}
-{STRING}		{colcount+=yyleng; printf("STRING\n");}
-{DOTLENGTH}		{colcount+=yyleng; printf("DOTLENGTH\n");}
-{RETURN}		{colcount+=yyleng; printf("RETURN\n");}
-{OCURV}			{colcount+=yyleng; printf("OCURV\n");}
-{CCURV}			{colcount+=yyleng; printf("CCURV\n");}
-{OBRACE}		{colcount+=yyleng; printf("OBRACE\n");}
-{CBRACE}		{colcount+=yyleng; printf("CBRACE\n");}
-{OSQUARE}		{colcount+=yyleng; printf("OSQUARE\n");}
-{CSQUARE}		{colcount+=yyleng; printf("CSQUARE\n");}
-{OP1}			{colcount+=yyleng; printf("OP1(%s)\n",yytext);}
-{OP2}			{colcount+=yyleng; printf("OP2(%s)\n",yytext);}
-{OP3}			{colcount+=yyleng; printf("OP3(%s)\n",yytext);}
-{OP4}			{colcount+=yyleng; printf("OP4(%s)\n",yytext);}
-{NOT}			{colcount+=yyleng; printf("NOT\n");}
-{ASSIGN}		{colcount+=yyleng; printf("ASSIGN\n");}
-{SEMIC}			{colcount+=yyleng; printf("SEMIC\n");}
-{COMMA}			{colcount+=yyleng; printf("COMMA\n");}
+{BOOLLIT}		{colcount+=yyleng; return BOOLLIT;}
+{INT}			{colcount+=yyleng; return INT;}
+{BOOL}			{colcount+=yyleng; return BOOL;}
+{NEW}			{colcount+=yyleng; return NEW;}
+{IF}			{colcount+=yyleng; return IF;}
+{ELSE}			{colcount+=yyleng; return ELSE;}
+{WHILE}			{colcount+=yyleng; return WHILE;}
+{PRINT}			{colcount+=yyleng; return PRINT;}
+{PARSEINT}		{colcount+=yyleng; return PARSEINT;}
+{CLASS}			{colcount+=yyleng; return CLASS;}
+{PUBLIC}		{colcount+=yyleng; return PUBLIC;}
+{STATIC}		{colcount+=yyleng; return STATIC;}
+{VOID}			{colcount+=yyleng; return VOID;}
+{STRING}		{colcount+=yyleng; return STRING;}
+{DOTLENGTH}		{colcount+=yyleng; return DOTLENGTH;}
+{RETURN}		{colcount+=yyleng; return RETURN;}
+{OCURV}			{colcount+=yyleng; return OCURV;}
+{CCURV}			{colcount+=yyleng; return CCURV;}
+{OBRACE}		{colcount+=yyleng; return OBRACE;}
+{CBRACE}		{colcount+=yyleng; return CBRACE;}
+{OSQUARE}		{colcount+=yyleng; return OSQUARE;}
+{CSQUARE}		{colcount+=yyleng; return CSQUARE;}
+{OP1}			{colcount+=yyleng; return OP1;}
+{OP2}			{colcount+=yyleng; return OP2;}
+{OP3}			{colcount+=yyleng; return OP3;}
+{OP4}			{colcount+=yyleng; return OP4;}
+{NOT}			{colcount+=yyleng; return NOT;}
+{ASSIGN}		{colcount+=yyleng; return ASSIGN;}
+{SEMIC}			{colcount+=yyleng; return SEMIC;}
+{COMMA}			{colcount+=yyleng; return COMMA;}
+                                   
+{RESERVED}		{colcount+=yyleng; return RESERVED;}
 
-{RESERVED}		{colcount+=yyleng; printf("RESERVED(%s)\n",yytext);}
-
-{ID}			{colcount+=yyleng; printf("ID(%s)\n",yytext);}
-{INTLIT}		{colcount+=yyleng; printf("INTLIT(%s)\n", yytext);}
+{ID}			{colcount+=yyleng; /* yylval.valorID=(char *) strdup(yytext);*/ return ID;}
+{INTLIT}		{colcount+=yyleng; /*yylval.valorInteiro=(int) atoi(yytext);*/ return INTLIT;}
 
 {SINGLELINECOM}		{;}
 
@@ -101,13 +111,6 @@ INTLIT		[0-9]+|0x[0-9a-fA-F]+
 
 .			{printf("Line %d, col %d: illegal character ('%c')\n", linhacount, colcount, yytext[0]); colcount+=yyleng;}
 %%
-
-int main()
-{
-	yylex();
-
-	return 0;
-}
 
 int yywrap()
 {
