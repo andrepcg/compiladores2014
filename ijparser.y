@@ -19,16 +19,19 @@ int yylex(void);
 %token RESERVED COMMA BOOL INT ID INTLIT IF ELSE WHILE RETURN PRINT BOOLLIT NEW PARSEINT PUBLIC STATIC VOID 
 %token CLASS OCURV CCURV OBRACE CBRACE OSQUARE CSQUARE OP1 OP2 OP3 OP4 NOT ASSIGN SEMIC STRING DOTLENGTH
 
+%nonassoc EXPR1REDUCE
+
 %right ASSIGN
-%left OP1 
-%left OP3
-%left OP4
-%left OP2
-%right NOT
+%left OP1 OP2 OP3 OP4
+%left COMMA
+%right NOT NEW
 %left OCURV CCURV
 %left OBRACE CBRACE
 %left OSQUARE CSQUARE
+%left DOTLENGTH
 %nonassoc IF ELSE
+%right UNARY
+
 
 %start start
 
@@ -58,14 +61,10 @@ field_decl
 	;
 	
 method_decl
-	:	PUBLIC STATIC type_void ID OCURV CCURV OBRACE 
-	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE CBRACE
-	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_state CBRACE
-	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE var_decl CBRACE
-	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE statement CBRACE
-	|	PUBLIC STATIC type_void ID OCURV CCURV OBRACE multi_var_state CBRACE
-	|	PUBLIC STATIC type_void ID OCURV CCURV OBRACE statement CBRACE
-	|	PUBLIC STATIC type_void ID OCURV CCURV OBRACE var_decl CBRACE
+	:	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE CBRACE
+	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_decl statement_multi CBRACE
+	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_decl CBRACE
+	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE statement_multi CBRACE
 	;
 	
 type_void
@@ -77,6 +76,7 @@ formal_params
 	:	type ID
 	|	type ID comma_type_id_multi
 	|	STRING OSQUARE CSQUARE ID
+	|
 	;
 	
 comma_type_id_multi
@@ -86,23 +86,14 @@ comma_type_id_multi
 	
 type
 	:	int_bool
-	|	int_bool square_multi
+	|	int_bool OSQUARE CSQUARE
 	;
 	
-multi_var_state
-	:	var_state
-	|	multi_var_state var_state
-	;
-	
-var_state
+multi_var_decl
 	:	var_decl
-	|	statement
+	|	multi_var_decl var_decl
 	;
-	
-square_multi
-	:	OSQUARE CSQUARE
-	|	square_multi OSQUARE CSQUARE
-	;
+
 	
 int_bool
 	:	INT
@@ -137,17 +128,26 @@ statement_multi
 	;
 	
 expr
-	: 	expr op_or expr
-	|	expr OSQUARE expr CSQUARE
-	|	id_int_bool
-	|	NEW int_bool OSQUARE expr CSQUARE
-	|	OCURV expr CCURV
-	|	expr DOTLENGTH expr
-	|	expr op3_not expr	
-	|	PARSEINT OCURV ID OSQUARE expr CSQUARE CCURV
-	|	ID OCURV CCURV
+	:	exprindex	%prec EXPR1REDUCE			  					
+	|	exprindex OSQUARE expr CSQUARE  				                        
+	|	exprnotindex	
+	
+	
+exprindex
+	:	expr op_or expr                                            
+    |	id_int_bool                         
+    |	OCURV expr CCURV                    
+    |	expr DOTLENGTH                  
+    |	NOT expr          %prec UNARY    
+    |	PARSEINT OCURV ID OSQUARE expr CSQUARE CCURV
+    |	ID OCURV CCURV
 	|	ID OCURV args CCURV
 	;
+
+exprnotindex
+	:	NEW int_bool OSQUARE expr CSQUARE      
+    ;
+
 	
 id_int_bool
 	:	ID
@@ -163,11 +163,6 @@ args
 comma_expr_multi
 	:	COMMA expr
 	|	comma_expr_multi COMMA expr
-	;
-
-op3_not
-	:	OP3
-	|	NOT
 	;
 	
 op_or
