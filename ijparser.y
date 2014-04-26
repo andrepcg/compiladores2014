@@ -24,14 +24,13 @@ int yylex(void);
 %right ASSIGN
 %left OP1 OP2 OP3 OP4
 %left COMMA
-%right NOT NEW
+%right NOT
 %left OCURV CCURV
 %left OBRACE CBRACE
 %left OSQUARE CSQUARE
 %left DOTLENGTH
 %nonassoc IF ELSE
 %right UNARY
-
 
 %start start
 
@@ -134,11 +133,15 @@ expr
 	
 	
 exprindex
-	:	expr op_or expr                                            
+	:	expr OP1 expr    
+	|	expr OP2 expr
+  	|	expr OP3 expr
+  	|	expr OP4 expr
     |	id_int_bool                         
     |	OCURV expr CCURV                    
     |	expr DOTLENGTH                  
-    |	NOT expr          %prec UNARY    
+    |	NOT expr          %prec UNARY  
+	|	OP3 expr
     |	PARSEINT OCURV ID OSQUARE expr CSQUARE CCURV
     |	ID OCURV CCURV
 	|	ID OCURV args CCURV
@@ -163,13 +166,6 @@ args
 comma_expr_multi
 	:	COMMA expr
 	|	comma_expr_multi COMMA expr
-	;
-	
-op_or
-	:	OP1
-	|	OP2
-	|	OP3
-	|	OP4
 	;
 
 	
