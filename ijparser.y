@@ -27,16 +27,16 @@ int yylex(void);
 %token CLASS OCURV CCURV OBRACE CBRACE OSQUARE CSQUARE OP1 OP2 OP3 OP4 NOT ASSIGN SEMIC STRING DOTLENGTH
 
 %nonassoc EXPR1REDUCE
+%nonassoc IF ELSE
 
 %right ASSIGN
-%left OP1 OP2 OP3 OP4
+%left OP1
+%left OP2
+%left OP3
+%left OP4
 %left COMMA
 %right NOT
-%left OCURV CCURV
-%left OBRACE CBRACE
-%left OSQUARE CSQUARE
-%left DOTLENGTH
-%nonassoc IF ELSE
+%left OSQUARE DOTLENGTH
 %right UNARY
 
 %start start
