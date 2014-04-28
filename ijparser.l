@@ -6,11 +6,17 @@
 	#include <stdio.h>
 	#include <ctype.h>
 	#include "y.tab.h"
+	
+	#define INITCOL  1
+	#define INITLINE 1
+	
+	void colCount(int l);
 
-	int linhacount = 1;
-	int colcount = 1;
-	int colCom = 0;
-	int linhaCom = 0;
+	int colNo = INITCOL;
+	int prevColNo = INITCOL;
+	int lineNo = INITLINE;
+	int prevLineNo = INITLINE;
+	int lineScom = 0, colScom = 0;
 	
 	extern int yylval;
 
@@ -60,57 +66,63 @@ INTLIT		[0-9]+|0x[0-9a-fA-F]+
 
 %%
 
-{BOOLLIT}		{colcount+=yyleng; return BOOLLIT;}
-{INT}			{colcount+=yyleng; return INT;}
-{BOOL}			{colcount+=yyleng; return BOOL;}
-{NEW}			{colcount+=yyleng; return NEW;}
-{IF}			{colcount+=yyleng; return IF;}
-{ELSE}			{colcount+=yyleng; return ELSE;}
-{WHILE}			{colcount+=yyleng; return WHILE;}
-{PRINT}			{colcount+=yyleng; return PRINT;}
-{PARSEINT}		{colcount+=yyleng; return PARSEINT;}
-{CLASS}			{colcount+=yyleng; return CLASS;}
-{PUBLIC}		{colcount+=yyleng; return PUBLIC;}
-{STATIC}		{colcount+=yyleng; return STATIC;}
-{VOID}			{colcount+=yyleng; return VOID;}
-{STRING}		{colcount+=yyleng; return STRING;}
-{DOTLENGTH}		{colcount+=yyleng; return DOTLENGTH;}
-{RETURN}		{colcount+=yyleng; return RETURN;}
-{OCURV}			{colcount+=yyleng; return OCURV;}
-{CCURV}			{colcount+=yyleng; return CCURV;}
-{OBRACE}		{colcount+=yyleng; return OBRACE;}
-{CBRACE}		{colcount+=yyleng; return CBRACE;}
-{OSQUARE}		{colcount+=yyleng; return OSQUARE;}
-{CSQUARE}		{colcount+=yyleng; return CSQUARE;}
-{OP1}			{colcount+=yyleng; return OP1;}
-{OP2}			{colcount+=yyleng; return OP2;}
-{OP3}			{colcount+=yyleng; return OP3;}
-{OP4}			{colcount+=yyleng; return OP4;}
-{NOT}			{colcount+=yyleng; return NOT;}
-{ASSIGN}		{colcount+=yyleng; return ASSIGN;}
-{SEMIC}			{colcount+=yyleng; return SEMIC;}
-{COMMA}			{colcount+=yyleng; return COMMA;}
+{BOOLLIT}		{colCount(yyleng); return BOOLLIT;}
+{INT}			{colCount(yyleng); return INT;}
+{BOOL}			{colCount(yyleng); return BOOL;}
+{NEW}			{colCount(yyleng); return NEW;}
+{IF}			{colCount(yyleng); return IF;}
+{ELSE}			{colCount(yyleng); return ELSE;}
+{WHILE}			{colCount(yyleng); return WHILE;}
+{PRINT}			{colCount(yyleng); return PRINT;}
+{PARSEINT}		{colCount(yyleng); return PARSEINT;}
+{CLASS}			{colCount(yyleng); return CLASS;}
+{PUBLIC}		{colCount(yyleng); return PUBLIC;}
+{STATIC}		{colCount(yyleng); return STATIC;}
+{VOID}			{colCount(yyleng); return VOID;}
+{STRING}		{colCount(yyleng); return STRING;}
+{DOTLENGTH}		{colCount(yyleng); return DOTLENGTH;}
+{RETURN}		{colCount(yyleng); return RETURN;}
+{OCURV}			{colCount(yyleng); return OCURV;}
+{CCURV}			{colCount(yyleng); return CCURV;}
+{OBRACE}		{colCount(yyleng); return OBRACE;}
+{CBRACE}		{colCount(yyleng); return CBRACE;}
+{OSQUARE}		{colCount(yyleng); return OSQUARE;}
+{CSQUARE}		{colCount(yyleng); return CSQUARE;}
+{OP1}			{colCount(yyleng); return OP1;}
+{OP2}			{colCount(yyleng); return OP2;}
+{OP3}			{colCount(yyleng); return OP3;}
+{OP4}			{colCount(yyleng); return OP4;}
+{NOT}			{colCount(yyleng); return NOT;}
+{ASSIGN}		{colCount(yyleng); return ASSIGN;}
+{SEMIC}			{colCount(yyleng); return SEMIC;}
+{COMMA}			{colCount(yyleng); return COMMA;}
                                    
-{RESERVED}		{colcount+=yyleng; return RESERVED;}
+{RESERVED}		{colCount(yyleng); return RESERVED;}
 
-{ID}			{colcount+=yyleng; /* yylval.valorID=(char *) strdup(yytext);*/ return ID;}
-{INTLIT}		{colcount+=yyleng; /*yylval.valorInteiro=(int) atoi(yytext);*/ return INTLIT;}
+{ID}			{colCount(yyleng); /* yylval.valorID=(char *) strdup(yytext);*/ return ID;}
+{INTLIT}		{colCount(yyleng); /*yylval.valorInteiro=(int) atoi(yytext);*/ return INTLIT;}
 
-{SINGLELINECOM}		{;}
+{SINGLELINECOM}		{prevColNo = colNo; colNo = INITCOL;}
 
-{IniCom}					{colCom = colcount; linhaCom=linhacount; BEGIN MULTILINECOM;}
-<MULTILINECOM>.				{colcount +=yyleng; }
-<MULTILINECOM>"\n"			{linhacount++;colcount=1;}
-<MULTILINECOM><<EOF>>		{printf("Line %d, col %d: unterminated comment\n",linhaCom,colCom); return 0;}
-<MULTILINECOM>{FimCom}		{colcount +=2; BEGIN 0;  }
+{IniCom}					{BEGIN MULTILINECOM; lineScom = lineNo; colScom = colNo; colCount(yyleng);}
+<MULTILINECOM>.				{colCount(yyleng);}
+<MULTILINECOM>"\n"			{prevLineNo = lineNo++; prevColNo = colNo; colNo = INITCOL;}
+<MULTILINECOM><<EOF>>		{colCount(0); printf("Line %d, col %d: unterminated comment\n",lineScom, colScom); return 0;}
+<MULTILINECOM>{FimCom}		{colCount(yyleng); BEGIN 0;  }
 
-\n							{colcount = 1; linhacount++; }
-[ \t\f\r]					{colcount +=yyleng; }
-<<EOF>> 					{colcount +=yyleng; yyterminate(); }
+\n							{prevLineNo = lineNo++; prevColNo = colNo; colNo = INITCOL;}
+[ \t\f\r]					{colCount(yyleng);}
+<<EOF>> 					{colCount(0); return yytext[0];}
 
 
-.			{printf("Line %d, col %d: illegal character ('%c')\n", linhacount, colcount, yytext[0]); colcount+=yyleng;}
+.			{printf("Line %d, col %d: illegal character ('%s')\n", lineNo, colNo, yytext); colNo++;}
 %%
+
+void colCount(int l){
+	prevLineNo = lineNo;
+	prevColNo = colNo;
+	colNo += l;
+}
 
 int yywrap()
 {
