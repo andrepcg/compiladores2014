@@ -3,8 +3,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-extern int linhacount;
-extern int colcount;
+extern int prevLineNo;
+extern int prevColNo;
 extern int yyleng;
 extern char *yytext;
 
@@ -177,11 +177,5 @@ int main(){
 }
 
 void yyerror(char *s) {
-	colcount -= yyleng;
-
-	if(strcmp(yytext, "") == 0){
-		colcount++;
-	}
-	
-	printf ("Line %d, col %d: %s: %s\n", linhacount, colcount, s, yytext);
+	printf("Line %d, col %d: %s: %s\n", prevLineNo, prevColNo, s, yytext);
 }
