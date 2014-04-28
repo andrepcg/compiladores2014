@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "structures.h"
+#include "shows.h"
+
 
 extern int prevLineNo;
 extern int prevColNo;
@@ -14,6 +17,10 @@ void yyerror(char *s);
 int yylex(void);
 
 %}
+
+%union{
+	char *token;
+}
 
 
 %token RESERVED COMMA BOOL INT ID INTLIT IF ELSE WHILE RETURN PRINT BOOLLIT NEW PARSEINT PUBLIC STATIC VOID 
@@ -171,9 +178,32 @@ comma_expr_multi
 	
 %%
 
-int main(){
+int main(int argc, char *argv[])
+{
 	yyparse();
-	return 0;
+
+	int i, printTree, printSymbols;
+	printTree = printSymbols = 0;
+	for(i=0; i < argc; i++)
+	{
+		if(strcmp(argv[i], "-s") == 0){
+			printSymbols = 1;
+			break;
+		}
+		else if(strcmp(argv[i], "-t") == 0){
+			printTree = 1;
+			break;
+		}
+	}
+	
+	/*
+	if(printTree)
+		printProgram(myProgram);
+	if(printSymbols)
+		printSymbolTables(symbolsTable);*/
+
+	//freeProgram(myProgram, symbolsTable);
+    return 0;
 }
 
 void yyerror(char *s) {
