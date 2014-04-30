@@ -3,7 +3,7 @@
 #include <string.h>
 #include "structures.h"
 
-void createClass(char *id, DeclList *declaracoes){
+Class* createClass(char *id, DeclList *declaracoes){
 	Class *class = (Class*) malloc(sizeof(Class));
 	class->id = id;
 	class->declaracoes = declaracoes;
@@ -31,28 +31,70 @@ DeclList* insertDecl(DeclType type, void* decl, DeclList* list)
     return list;
 }
 
-VarDeclList* insertVarDecl(VardDeclList vardecl, Type tipo, char *id, IDList *listaIDs){
+ParamList* insertFormalParam(Type tipo, char *id, ParamList *lista, int isHead){
+
+	ParamList *novo = (ParamList*) malloc(sizeof(ParamList));
+	
+	novo->tipo = tipo;
+	novo->id = id;
+	
+	if(!isHead)
+		return novo;
+		
+	ParamList* aux = lista;
+	for(; aux->next != NULL; aux = aux->next);
+	aux->next = novo;
+
+	return lista;
+
+}
+
+
+IDList* insertIDList(char *id, IDList *listaIDs){
 	IDList* newId = (IDList*) malloc(sizeof(IDList));
     newId->id = id;
     newId->next = listaIDs;
-
-    VarDecl* newVarDecl = (VarDecl*) malloc(sizeof(VarDecl));
-	newVarDecl->type = tipo;
-	newVarDecl->isStatic = 0;
-	newVarDecl->idList = newId;
-
-    VarDeclList* newVarDeclList = (VarDeclList*) malloc(sizeof(VarDeclList));
-    newVarDeclList->varDecl = newVarDecl;
-    newVarDeclList->next = NULL;
-
-    if(vardecl==NULL)
-        return newVarDeclList;
-
-	VarDeclList* aux = vardecl;
-	for(; aux->next != NULL; aux = aux->next);
-	aux->next = newVarDeclList;
-
-	return vardecl;
 	
+	if(listaIDs == NULL)
+		return newId;
+		
+	IDList* aux = listaIDs;
+	for(; aux->next != NULL; aux = aux->next);
+	aux->next = newId;
+
+	return listaIDs;
 }
+
+VarDecl* insertVarDecl(Type tipo, char *id, IDList *listaIDs, int iStatic){
+	VarDecl *newVar = (VarDecl*) malloc(sizeof(VarDecl));
+	newVar->id = id;
+	newVar->iStatic = iStatic;
+	newVar->idList = listaIDs;
+	
+	return newVar;
+
+}
+
+VarDeclList* insertVarDeclList(VarDecl *vardecl, VarDeclList *listaDecl){
+	VarDeclList *newList = (VarDecl*) malloc(sizeof(VarDecl));
+	newList->declaracao = vardecl;
+	newList->next = NULL;
+	
+	if(listaDecl == NULL)
+		return newList;
+		
+	VarDeclList* aux = listaDecl;
+	for(; aux->next != NULL; aux = aux->next);
+	aux->next = newList;
+
+	return listaDecl;
+}
+
+VarDecl* setStatic(VarDecl *vardecl, int a){
+	vardecl->iStatic = a;
+	
+	return vardecl;
+
+}
+
 
