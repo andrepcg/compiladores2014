@@ -97,4 +97,16 @@ VarDecl* setStatic(VarDecl *vardecl, int a){
 
 }
 
+MethodDecl* insertMethodDecl(Type tipo, char *id, ParamList *parametros, VardDeclList *declaracoes, StmtList *stmts){
+	MethodDecl *newMethod = (MethodDecl*) malloc(sizeof(MethodDecl));
+	
+	MethodDecl->type = tipo;
+	MethodDecl->id = id;
+	MethodDecl->parametros = parametros;
+	MethodDecl->declaracoes = declaracoes;
+	MethodDecl->stmts = stmts;
+	
+	return newMethod;
+}
+
 

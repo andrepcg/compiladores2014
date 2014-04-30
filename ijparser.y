@@ -67,10 +67,10 @@ field_decl
 	;
 	
 method_decl
-	:	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE CBRACE										{/*$$=insertMethodDecl($3, $4, $6, NULL, NULL);*/}
-	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_decl statement_multi CBRACE		{/*$$=insertMethodDecl($3, $4, $6, $9, $10);*/}
-	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_decl CBRACE						{/*$$=insertMethodDecl($3, $4, $6, $9, NULL);*/}
-	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE statement_multi CBRACE						{/*$$=insertMethodDecl($3, $4, $6, $9, NULL);*/}
+	:	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE CBRACE										{$$ = insertMethodDecl($3, $4, $6, NULL, NULL);}
+	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_decl statement_multi CBRACE		{$$ = insertMethodDecl($3, $4, $6, $9, $10);}
+	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_decl CBRACE						{$$ = insertMethodDecl($3, $4, $6, $9, NULL);}
+	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE statement_multi CBRACE						{$$ = insertMethodDecl($3, $4, $6, $9, NULL);}
 	;
 	
 type_void
@@ -79,14 +79,14 @@ type_void
 	;
 
 formal_params
-	:	type ID comma_type_id_multi				{$$=insertFormalParam($1, $2, $3, 1);}
-	|	STRING OSQUARE CSQUARE ID				{$$=insertFormalParam(STRINGARRAY, $4, NULL, 1);}
-	|											{$$=NULL;}
+	:	type ID comma_type_id_multi				{$$ = insertFormalParam($1, $2, $3, 1);}
+	|	STRING OSQUARE CSQUARE ID				{$$ = insertFormalParam(STRINGARRAY, $4, NULL, 1);}
+	|											{$$ = NULL;}
 	;
 	
 comma_type_id_multi
-	:	comma_type_id_multi COMMA type ID		{$$=insertFormalParam($3, $4, $1, 0);}
-	|											{$$=NULL;}
+	:	comma_type_id_multi COMMA type ID		{$$ = insertFormalParam($3, $4, $1, 0);}
+	|											{$$ = NULL;}
 	;
 	
 type

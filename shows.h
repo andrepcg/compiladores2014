@@ -4,7 +4,13 @@
 #include "structures.h"
 
 
-void printProgram(Class*);
-void printSymbolTables(ClassTable*);
+void printClass(Class* class);
+void printDeclList(DeclList* list);
+void printMethodDecl(MethodDecl *method);
+void printMethodParams(ParamList *params, int level);
+void print(char *s, int level, int linebreak);
+char* idFormat(char *id);
+char* typeToString(Type type);
+
 
 #endif
