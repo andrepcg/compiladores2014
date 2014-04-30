@@ -63,14 +63,14 @@ program_multi
 	;
 
 field_decl
-	:	STATIC var_decl
+	:	STATIC var_decl								{$$ = setStatic($2,1);}
 	;
 	
 method_decl
-	:	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE CBRACE										{$$=insertMethodDecl($3, $4, $6, NULL, NULL);}
-	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_decl statement_multi CBRACE		{$$=insertMethodDecl($3, $4, $6, $9, $10);}
-	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_decl CBRACE						{$$=insertMethodDecl($3, $4, $6, $9, NULL);}
-	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE statement_multi CBRACE						{$$=insertMethodDecl($3, $4, $6, $9, NULL);}
+	:	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE CBRACE										{/*$$=insertMethodDecl($3, $4, $6, NULL, NULL);*/}
+	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_decl statement_multi CBRACE		{/*$$=insertMethodDecl($3, $4, $6, $9, $10);*/}
+	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_decl CBRACE						{/*$$=insertMethodDecl($3, $4, $6, $9, NULL);*/}
+	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE statement_multi CBRACE						{/*$$=insertMethodDecl($3, $4, $6, $9, NULL);*/}
 	;
 	
 type_void
@@ -80,7 +80,7 @@ type_void
 
 formal_params
 	:	type ID comma_type_id_multi				{$$=insertFormalParam($1, $2, $3, 1);}
-	|	STRING OSQUARE CSQUARE ID				
+	|	STRING OSQUARE CSQUARE ID				{$$=insertFormalParam(STRINGARRAY, $4, NULL, 1);}
 	|											{$$=NULL;}
 	;
 	
@@ -97,17 +97,17 @@ type
 	;
 	
 multi_var_decl
-	:	var_decl
-	|	multi_var_decl var_decl
+	:	var_decl								{$$ = $1}
+	|	multi_var_decl var_decl					{$$ = insertVarDeclList($2, $1)}
 	;
 	
 var_decl
-	:	type ID SEMIC						{}
-	|	type ID comma_id_multi SEMIC		{$$ = insertVarDecl}
-	
+	:	type ID comma_id_multi SEMIC		{$$ = insertVarDecl($1, $2, $3, 0)}
+	;
+
 comma_id_multi
-	:	COMMA ID
-	|	comma_id_multi COMMA ID
+	:	comma_id_multi COMMA ID				{$$ = insertIDList($3, $1);}
+	|										{$$ = NULL;}
 	;
 	
 statement
