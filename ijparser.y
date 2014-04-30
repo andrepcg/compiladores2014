@@ -16,6 +16,8 @@ int yydebug=0;
 void yyerror(char *s);
 int yylex(void);
 
+Class *programa;
+
 %}
 
 %union{
@@ -48,18 +50,16 @@ start
 	;
 
 program
-	:	CLASS ID OBRACE CBRACE
-	|	CLASS ID OBRACE program_multi CBRACE
+	:	CLASS ID OBRACE CBRACE						{$$ = createClass($2, NULL); programa = $$;}
+	|	CLASS ID OBRACE program_multi CBRACE		{$$ = createClass($2, $4); programa = $$;}
 	;
 
-field_method_decl
-	:	field_decl
-	|	method_decl
-	;
 	
 program_multi
-	:	field_method_decl
-	|	program_multi field_method_decl
+	:	field_decl									{$$=insertDecl(VARDECL, $1, NULL);}
+	|	method_decl									{$$=insertDecl(METHODDECL, $1, NULL);}
+	|	program_multi field_decl					{$$=insertDecl(VARDECL, $2, $1);}
+	|	program_multi method_decl					{$$=insertDecl(METHODDECL, $2, $1);}
 	;
 
 field_decl
@@ -67,48 +67,43 @@ field_decl
 	;
 	
 method_decl
-	:	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE CBRACE
-	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_decl statement_multi CBRACE
-	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_decl CBRACE
-	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE statement_multi CBRACE
+	:	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE CBRACE										{$$=insertMethodDecl($3, $4, $6, NULL, NULL);}
+	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_decl statement_multi CBRACE		{$$=insertMethodDecl($3, $4, $6, $9, $10);}
+	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_decl CBRACE						{$$=insertMethodDecl($3, $4, $6, $9, NULL);}
+	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE statement_multi CBRACE						{$$=insertMethodDecl($3, $4, $6, $9, NULL);}
 	;
 	
 type_void
-	:	type
-	|	VOID
+	:	type		{$$ = $1;}
+	|	VOID		{$$ = VOID_T;}
 	;
 
 formal_params
-	:	type ID
-	|	type ID comma_type_id_multi
-	|	STRING OSQUARE CSQUARE ID
-	|
+	:	type ID comma_type_id_multi				{$$=insertFormalParam($1, $2, $3, 1);}
+	|	STRING OSQUARE CSQUARE ID				
+	|											{$$=NULL;}
 	;
 	
 comma_type_id_multi
-	:	COMMA type ID
-	|	comma_type_id_multi COMMA type ID
+	:	comma_type_id_multi COMMA type ID		{$$=insertFormalParam($3, $4, $1, 0);}
+	|											{$$=NULL;}
 	;
 	
 type
-	:	int_bool
-	|	int_bool OSQUARE CSQUARE
+	:	INT										{$$ = INT_T;}
+	|	BOOL									{$$ = BOOL_T;}
+	|	INT OSQUARE CSQUARE						{$$ = INTARRAY;}
+	|	BOOL OSQUARE CSQUARE					{$$ = BOOLRRAY;}
 	;
 	
 multi_var_decl
 	:	var_decl
 	|	multi_var_decl var_decl
 	;
-
-	
-int_bool
-	:	INT
-	|	BOOL
-	;
 	
 var_decl
-	:	type ID SEMIC
-	|	type ID comma_id_multi SEMIC
+	:	type ID SEMIC						{}
+	|	type ID comma_id_multi SEMIC		{$$ = insertVarDecl}
 	
 comma_id_multi
 	:	COMMA ID
@@ -155,7 +150,8 @@ exprindex
 	;
 
 exprnotindex
-	:	NEW int_bool OSQUARE expr CSQUARE      
+	:	NEW INT OSQUARE expr CSQUARE      
+	|	NEW BOOL OSQUARE expr CSQUARE      
     ;
 
 	
