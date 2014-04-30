@@ -142,4 +142,12 @@ typedef struct {
 	DeclList *declaracoes;
 } Class;
 
+Class* createClass(char *id, DeclList *declaracoes);
+DeclList* insertDecl(DeclType type, void* decl, DeclList* list);
+ParamList* insertFormalParam(Type tipo, char *id, ParamList *lista, int isHead);
+IDList* insertIDList(char *id, IDList *listaIDs);
+VarDecl* insertVarDecl(Type tipo, char *id, IDList *listaIDs, int iStatic);
+VarDeclList* insertVarDeclList(VarDecl *vardecl, VarDeclList *listaDecl);
+
+
 #endif
