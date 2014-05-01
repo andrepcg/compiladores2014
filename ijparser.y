@@ -161,15 +161,15 @@ expr
     
     
 exprindex
-    :   expr OP1 expr                                   {$$=insertExpression(BINOP,checkOP($2),$1,$3,NULL);}
-    |   expr OP2 expr                                   {$$=insertExpression(BINOP,checkOP($2),$1,$3,NULL);}
-    |   expr OP3 expr                                   {$$=insertExpression(BINOP,checkOP($2),$1,$3,NULL);}
-    |   expr OP4 expr                                   {$$=insertExpression(BINOP,checkOP($2),$1,$3,NULL);}
+    :   expr OP1 expr                                   {$$=insertExpression(BINOP,$2,$1,$3,NULL);}
+    |   expr OP2 expr                                   {$$=insertExpression(BINOP,$2,$1,$3,NULL);}
+    |   expr OP3 expr                                   {$$=insertExpression(BINOP,$2,$1,$3,NULL);}
+    |   expr OP4 expr                                   {$$=insertExpression(BINOP,$2,$1,$3,NULL);}
     |   id_int_bool                                     {$$=insertExpression($1,NULL,NULL,NULL,NULL);}
     |   OCURV expr CCURV                                {$$=$2;}
-    |   expr DOTLENGTH                                  {$$=insertExpression(UNOP,checkOP($2),$1,NULL,NULL);}
-    |   NOT expr          %prec UNARY                   {$$=insertExpression(UNOP,checkOP($1),$2,NULL,NULL);}
-    |   OP3 expr                                        {$$=insertExpression(UNOP,checkOP($1),$2,NULL,NULL);}
+    |   expr DOTLENGTH                                  {$$=insertExpression(UNOP,$2,$1,NULL,NULL);}
+    |   NOT expr          %prec UNARY                   {$$=insertExpression(UNOP,$1,$2,NULL,NULL);}
+    |   OP3 expr                                        {$$=insertExpression(UNOP,$1,$2,NULL,NULL);}
     |   PARSEINT OCURV ID OSQUARE expr CSQUARE CCURV    {$$=insertExpression(PARSEINT_T,NULL,$5,NULL,NULL);}
     |   ID OCURV CCURV                                  {$$=insertExpression(CALL,NULL,NULL,NULL,NULL);}
     |   ID OCURV args CCURV                             {$$=insertExpression(CALL,NULL,NULL,NULL,$3);}

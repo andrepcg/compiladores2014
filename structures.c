@@ -168,10 +168,10 @@ ArgsList* insertArgs(Expr *expr, ArgsList *lista){
 	
 }
 
-Expr *insertExpression(ExprType type,OpType op,Expr *expr1,Expr *expr2,ArgsList *argsList){
+Expr *insertExpression(ExprType type,char *op,Expr *expr1,Expr *expr2,ArgsList *argsList){
     Expr *novo = (Expr*) malloc(sizeof(Expr));
     novo->type = type;
-    novo->op = op;
+    novo->op = (op != NULL) ? checkOP(op) : NULL;
     novo->expr1 =  expr1;
     novo->expr2 = expr2;
     novo->argsList = argsList;
@@ -211,5 +211,7 @@ OpType checkOP(char *op){
         return NOT;
     else if(strcmp(op,".length")==0)
         return DOTLENGTH_T;
+	else
+		return NULL;
 
 }
