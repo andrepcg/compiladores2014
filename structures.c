@@ -109,4 +109,36 @@ MethodDecl* insertMethodDecl(Type tipo, char *id, ParamList *parametros, VardDec
 	return newMethod;
 }
 
+Statement *insertStatement(StmtType tipo,StmtList *stmts,Expr *expr,Expr *expr2,Statement *stmt1,Statement *stmt2){
+    Statement *novo = (Statement) malloc(sizeof(Statement));
+    novo->tipo=tipo;
+    novo->stmts=stmts;
+    novo->expr=expr;
+    novo->expr2=expr2;
+    novo->stmt1=stmt1;
+    novo->stmt2=stmt2;
+
+    return novo;
+
+
+}
+
+StmtList *insertListStatement(Statement *stmt,StmtList *lista){
+    StmtList* novo = (StmtList*) malloc(sizeof(StmtList));
+    
+    novo->stmt=stmt;
+    novo->next=lista;
+
+    if(lista==NULL)
+        return novo;
+
+
+    StmtList* aux = lista;
+    for(; aux->next != NULL; aux = aux->next);
+    aux->next = novo;
+
+    return lista;
+  
+}
+
 
