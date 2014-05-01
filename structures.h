@@ -5,7 +5,7 @@ typedef enum {VARDECL, METHODDECL} DeclType;
 typedef enum {VOID_T, INT_T, BOOL_T, INTARRAY, BOOLARRAY, STRINGARRAY, METHOD} Type;
 typedef enum {CSTAT, IFELSE, RETURN_T, WHILE_T, PRINT_T, STORE, STOREARRAY} StmtType;
 typedef enum {BINOP, UNOP, ID_T, INTLIT_T, BOOLLIT_T, CALL, PARSEINT_T, INDEX, NEWINTARR, NEWBOOLARR} ExprType;
-typedef enum {PLUS, MINUS, MUL, DIV, MOD, LESSER, GREATER, LEQ, GEQ, DIF, EQ, DOTLENGTH_T, AND_T, OR_T, NOT} OpType;
+typedef enum {PLUS, MINUS, MUL, DIV, MOD, LESSER, GREATER, LEQ, GEQ, DIF, EQ, DOTLENGTH_T, AND_T, OR_T, NOT_} OpType;
 
 typedef struct _argsList ArgsList;
 
@@ -28,7 +28,7 @@ struct _argsList
 typedef struct _stmt{
 	StmtType tipo;
 	struct _stmtList *stmts;
-	
+	char *id;
 	Expr *expr1;
 	Expr *expr2;
 	
@@ -96,12 +96,13 @@ DeclList* insertDecl(DeclType type, void* decl, DeclList* list);
 ParamList* insertFormalParam(Type tipo, char *id, ParamList *lista, int isHead);
 IDList* insertIDList(char *id, IDList *listaIDs);
 VarDecl* insertVarDecl(Type tipo, char *id, IDList *listaIDs, int iStatic);
+VarDecl* setStatic(void *vardecl, int a);
 VarDeclList* insertVarDeclList(VarDecl *vardecl, VarDeclList *listaDecl);
 Expr *insertExpression(ExprType type,char *op,Expr *expr1,Expr *expr2,ArgsList *argsList);
 OpType checkOP(char *op);
 ArgsList* insertArgs(Expr *expr, ArgsList *lista);
 StmtList *insertListStatement(Statement *stmt,StmtList *lista);
-Statement *insertStatement(StmtType tipo,StmtList *stmts,Expr *expr,Expr *expr2,Statement *stmt1,Statement *stmt2);
+Statement *insertStatement(StmtType tipo, char* id, StmtList *stmts,Expr *expr,Expr *expr2,Statement *stmt1,Statement *stmt2);
 
 
 

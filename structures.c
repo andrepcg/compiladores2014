@@ -99,10 +99,12 @@ VarDeclList* insertVarDeclList(VarDecl *vardecl, VarDeclList *listaDecl){
 	return listaDecl;
 }
 
-VarDecl* setStatic(VarDecl *vardecl, int a){
-	vardecl->iStatic = a;
+VarDecl* setStatic(void *vardecl, int a){
+	VarDecl *v = (VarDecl*) vardecl;
+	v = (VarDecl*) vardecl;
+	v->iStatic = a;
 	
-	return vardecl;
+	return v;
 
 }
 
@@ -111,16 +113,17 @@ MethodDecl* insertMethodDecl(Type tipo, char *id, ParamList *parametros, VarDecl
 	
 	newMethod->tipo = tipo;
 	newMethod->id = id;
-	newMethod->parametros = parametros;
-	newMethod->declaracoes = declaracoes;
-	newMethod->stmts = stmts;
+	newMethod->parametros = (ParamList*) parametros;
+	newMethod->declaracoes = (VarDeclList*) declaracoes;
+	newMethod->stmts = (StmtList*) stmts;
 	
 	return newMethod;
 }
 
-Statement *insertStatement(StmtType tipo,StmtList *stmts,Expr *expr,Expr *expr2,Statement *stmt1,Statement *stmt2){
+Statement *insertStatement(StmtType tipo, char* id, StmtList *stmts, Expr *expr, Expr *expr2, Statement *stmt1, Statement *stmt2){
     Statement *novo = (Statement*) malloc(sizeof(Statement));
     novo->tipo = tipo;
+	novo->id = id;
     novo->stmts = stmts;
     novo->expr1 = expr;
     novo->expr2 = expr2;
@@ -171,7 +174,7 @@ ArgsList* insertArgs(Expr *expr, ArgsList *lista){
 Expr *insertExpression(ExprType type,char *op, Expr *expr1,Expr *expr2,ArgsList *argsList){
     Expr *novo = (Expr*) malloc(sizeof(Expr));
     novo->type = type;
-    novo->op = (op != NULL) ? checkOP(op) : NULL;
+    novo->op = (op != NULL) ? checkOP(op) : -1;
     novo->expr1 =  expr1;
     novo->expr2 = expr2;
     novo->argsList = argsList;
@@ -211,7 +214,5 @@ OpType checkOP(char *op){
         return NOT_;
     else if(strcmp(op,".length")==0)
         return DOTLENGTH_T;
-	else
-		return NULL;
 
 }

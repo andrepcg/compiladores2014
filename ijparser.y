@@ -137,15 +137,15 @@ comma_id_multi
 	;
 	
 statement
-    :   OBRACE statement_multi CBRACE				    {$$=insertStatement(NULL,$2,NULL,NULL,NULL,NULL);}
-	|   IF OCURV expr CCURV statement ELSE statement  %prec ELSE   {$$=insertStatement(IFELSE,NULL,$3,NULL,$5,$7);}    
-	|   IF OCURV expr CCURV statement     	%prec IF	    	{$$=insertStatement(IFELSE,NULL,$3,NULL,$5,NULL);}
-    |   WHILE OCURV expr CCURV statement                {$$=insertStatement(WHILE_T,NULL,$3,NULL,$5,NULL);}
-    |   PRINT OCURV expr CCURV SEMIC                    {$$=insertStatement(PRINT_T,NULL,$3,NULL,NULL,NULL);}
-    |   ID ASSIGN expr SEMIC                            {$$=insertStatement(STORE,NULL,$3,NULL,NULL,NULL);}
-    |   ID OSQUARE expr CSQUARE ASSIGN expr SEMIC       {$$=insertStatement(STOREARRAY,NULL,$3,$6,NULL,NULL);}
-    |   RETURN SEMIC                                    {$$=insertStatement(RETURN_T,NULL,NULL,NULL,NULL,NULL);}
-    |   RETURN expr SEMIC                               {$$=insertStatement(RETURN_T,NULL,$2,NULL,NULL,NULL);}
+    :   OBRACE statement_multi CBRACE				    {$$=insertStatement(CSTAT,NULL,$2,NULL,NULL,NULL,NULL);}
+	|   IF OCURV expr CCURV statement ELSE statement  %prec ELSE   {$$=insertStatement(IFELSE,NULL,NULL,$3,NULL,$5,$7);}    
+	|   IF OCURV expr CCURV statement     	%prec IF	    	{$$=insertStatement(IFELSE,NULL,NULL,$3,NULL,$5,NULL);}
+    |   WHILE OCURV expr CCURV statement                {$$=insertStatement(WHILE_T,NULL,NULL,$3,NULL,$5,NULL);}
+    |   PRINT OCURV expr CCURV SEMIC                    {$$=insertStatement(PRINT_T,NULL,NULL,$3,NULL,NULL,NULL);}
+    |   ID ASSIGN expr SEMIC                            {$$=insertStatement(STORE,$1,NULL,$3,NULL,NULL,NULL);}
+    |   ID OSQUARE expr CSQUARE ASSIGN expr SEMIC       {$$=insertStatement(STOREARRAY,$1,NULL,$3,$6,NULL,NULL);}
+    |   RETURN SEMIC                                    {$$=insertStatement(RETURN_T,NULL,NULL,NULL,NULL,NULL,NULL);}
+    |   RETURN expr SEMIC                               {$$=insertStatement(RETURN_T,NULL,NULL,$2,NULL,NULL,NULL);}
     ;
     
 statement_multi     
