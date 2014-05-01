@@ -4,21 +4,17 @@
 	#include <string.h>
 	#include <stdlib.h>
 	#include <stdio.h>
-	#include <ctype.h>
+	#include "structures.h"
 	#include "y.tab.h"
-	
-	#define INITCOL  1
-	#define INITLINE 1
 	
 	void colCount(int l);
 
-	int colNo = INITCOL;
-	int prevColNo = INITCOL;
-	int lineNo = INITLINE;
-	int prevLineNo = INITLINE;
+	int colNo = 1;
+	int prevColNo = 1;
+	int lineNo = 1;
+	int prevLineNo = 1;
 	int lineScom = 0, colScom = 0;
 	
-	extern int yylval;
 
 %}
 
@@ -66,7 +62,7 @@ INTLIT		[0-9]+|0x[0-9a-fA-F]+
 
 %%
 
-{BOOLLIT}		{colCount(yyleng); return BOOLLIT;}
+{BOOLLIT}		{colCount(yyleng); yylval.token = strdup(yytext); return BOOLLIT;}
 {INT}			{colCount(yyleng); return INT;}
 {BOOL}			{colCount(yyleng); return BOOL;}
 {NEW}			{colCount(yyleng); return NEW;}
@@ -88,29 +84,29 @@ INTLIT		[0-9]+|0x[0-9a-fA-F]+
 {CBRACE}		{colCount(yyleng); return CBRACE;}
 {OSQUARE}		{colCount(yyleng); return OSQUARE;}
 {CSQUARE}		{colCount(yyleng); return CSQUARE;}
-{OP1}			{colCount(yyleng); return OP1;}
-{OP2}			{colCount(yyleng); return OP2;}
-{OP3}			{colCount(yyleng); return OP3;}
-{OP4}			{colCount(yyleng); return OP4;}
+{OP1}			{colCount(yyleng); yylval.token = strdup(yytext); return OP1;}
+{OP2}			{colCount(yyleng); yylval.token = strdup(yytext); return OP2;}
+{OP3}			{colCount(yyleng); yylval.token = strdup(yytext); return OP3;}
+{OP4}			{colCount(yyleng); yylval.token = strdup(yytext); return OP4;}
 {NOT}			{colCount(yyleng); return NOT;}
 {ASSIGN}		{colCount(yyleng); return ASSIGN;}
 {SEMIC}			{colCount(yyleng); return SEMIC;}
 {COMMA}			{colCount(yyleng); return COMMA;}
                                    
-{RESERVED}		{colCount(yyleng); return RESERVED;}
+{RESERVED}		{yylval.token = strdup(yytext); colCount(yyleng); return RESERVED;}
 
-{ID}			{colCount(yyleng); /* yylval.valorID=(char *) strdup(yytext);*/ return ID;}
-{INTLIT}		{colCount(yyleng); /*yylval.valorInteiro=(int) atoi(yytext);*/ return INTLIT;}
+{ID}			{colCount(yyleng); yylval.token = strdup(yytext); return ID;}
+{INTLIT}		{colCount(yyleng); yylval.token = strdup(yytext); return INTLIT;}
 
-{SINGLELINECOM}		{prevColNo = colNo; colNo = INITCOL;}
+{SINGLELINECOM}		{prevColNo = colNo; colNo = 1;}
 
 {IniCom}					{BEGIN MULTILINECOM; lineScom = lineNo; colScom = colNo; colCount(yyleng);}
 <MULTILINECOM>.				{colCount(yyleng);}
-<MULTILINECOM>"\n"			{prevLineNo = lineNo++; prevColNo = colNo; colNo = INITCOL;}
+<MULTILINECOM>"\n"			{prevLineNo = lineNo++; prevColNo = colNo; colNo = 1;}
 <MULTILINECOM><<EOF>>		{colCount(0); printf("Line %d, col %d: unterminated comment\n",lineScom, colScom); return 0;}
 <MULTILINECOM>{FimCom}		{colCount(yyleng); BEGIN 0;  }
 
-\n							{prevLineNo = lineNo++; prevColNo = colNo; colNo = INITCOL;}
+\n							{prevLineNo = lineNo++; prevColNo = colNo; colNo = 1;}
 [ \t\f\r]					{colCount(yyleng);}
 <<EOF>> 					{colCount(0); return yytext[0];}
 

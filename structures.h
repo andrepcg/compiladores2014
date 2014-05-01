@@ -1,14 +1,13 @@
 #ifndef STRUCTURES_H
 #define STRUCTURES_H
 
-////
-// Enums of nodes types.
-
 typedef enum {VARDECL, METHODDECL} DeclType;
 typedef enum {VOID_T, INT_T, BOOL_T, INTARRAY, BOOLARRAY, STRINGARRAY, METHOD} Type;
 typedef enum {CSTAT, IFELSE, RETURN_T, WHILE_T, PRINT_T, STORE, STOREARRAY} StmtType;
 typedef enum {BINOP, UNOP, ID_T, INTLIT_T, BOOLLIT_T, CALL, PARSEINT_T, INDEX, NEWINTARR, NEWBOOLARR} ExprType;
-typedef enum {PLUS, MINUS, MUL, DIV, REM, LESSER, GREATER, LEQ, GEQ, DIF, EQ, NOT, DOTLENGTH_T, AND_T, OR_T} OpType;
+typedef enum {PLUS, MINUS, MUL, DIV, MOD, LESSER, GREATER, LEQ, GEQ, DIF, EQ, NOT, DOTLENGTH_T, AND_T, OR_T} OpType;
+
+typedef struct _argsList ArgsList;
 
 typedef struct _expr
 {
@@ -16,7 +15,6 @@ typedef struct _expr
     OpType op;
 	struct _expr *expr1;
 	struct _expr *expr2;
-	char *idOrLit;
 	ArgsList *argsList;
 } Expr;
 
@@ -26,65 +24,16 @@ struct _argsList
     struct _argsList *next;
 };
 
-/*
-	Tipos de statements
-	
-	{
-		statement
-		statement
-		...
-		(stmtList)
-	}
-	
-	ou
-	
-	if(expr)
-		statement
-		
-	ou
-	
-	if(expr)
-		statement
-	else
-		statement
-		
-	ou
-		
-	while(expr)
-		statement
 
-	ou
-	
-	print(expr);
-	
-	ou
-	
-	a = expr;
-	
-	ou
-	
-	a[expr] = expr;
-	
-	ou
-	
-	return;
-	
-	ou
-	
-	return expr;
-
-
-*/
-
-typedef struct {
+typedef struct _stmt{
 	StmtType tipo;
 	struct _stmtList *stmts;
 	
 	Expr *expr1;
 	Expr *expr2;
 	
-	Statement *stmt1;
-	Statement *stmt2;
+	struct _stmt *stmt1;
+	struct _stmt *stmt2;
 	
 } Statement;
 
@@ -107,7 +56,7 @@ typedef struct {
 typedef struct _varDeclList {
 	VarDecl *declaracao;
 	struct _varDeclList *next;
-} VardDeclList;
+} VarDeclList;
 
 
 typedef struct _paramList {
@@ -121,7 +70,7 @@ typedef struct {
 	char *id;
 	
 	ParamList *parametros;
-	VardDeclList *declaracoes;
+	VarDeclList *declaracoes;
 	StmtList *stmts;
 	
 } MethodDecl;
@@ -137,7 +86,7 @@ typedef struct _declList {
 	
 } DeclList;
 
-typedef struct {
+typedef struct _class {
 	char *id;
 	DeclList *declaracoes;
 } Class;
@@ -148,6 +97,12 @@ ParamList* insertFormalParam(Type tipo, char *id, ParamList *lista, int isHead);
 IDList* insertIDList(char *id, IDList *listaIDs);
 VarDecl* insertVarDecl(Type tipo, char *id, IDList *listaIDs, int iStatic);
 VarDeclList* insertVarDeclList(VarDecl *vardecl, VarDeclList *listaDecl);
+Expr *insertExpression(ExprType type,OpType op,Expr *expr1,Expr *expr2,ArgsList *argsList);
+OpType checkOP(char *op);
+ArgsList* insertArgs(Expr *expr, ArgsList *lista);
+StmtList *insertListStatement(Statement *stmt,StmtList *lista);
+Statement *insertStatement(StmtType tipo,StmtList *stmts,Expr *expr,Expr *expr2,Statement *stmt1,Statement *stmt2);
+
 
 
 #endif

@@ -22,23 +22,52 @@ Class *programa;
 
 %union{
 	char *token;
+	Type type;
+	ExprType exprtype;
+
+	struct _class *class;
+	DeclList *decllist;
+	VarDecl *vardecl;
+	MethodDecl *methoddecl;
+	ParamList *paramlist;
+	VarDeclList *vardecllist;
+	IDList *idlist;	
+	StmtList *stmtlist;
+	Statement *stmt;	
+	Expr *expr;
+	ArgsList *argslist;
 }
 
 
-%token RESERVED COMMA BOOL INT ID INTLIT IF ELSE WHILE RETURN PRINT BOOLLIT NEW PARSEINT PUBLIC STATIC VOID 
-%token CLASS OCURV CCURV OBRACE CBRACE OSQUARE CSQUARE OP1 OP2 OP3 OP4 NOT ASSIGN SEMIC STRING DOTLENGTH
+%token <token> RESERVED COMMA BOOL INT ID INTLIT IF ELSE WHILE RETURN PRINT BOOLLIT NEW PARSEINT PUBLIC STATIC VOID CLASS OCURV CCURV OBRACE CBRACE OSQUARE CSQUARE OP1 OP2 OP3 OP4 NOT ASSIGN SEMIC STRING DOTLENGTH
+
+%type <class>		program
+%type <decllist>	program_multi
+%type <vardecl>		var_decl field_decl
+%type <methoddecl>	method_decl
+%type <paramlist>	formal_params comma_type_id_multi
+%type <vardecllist>	multi_var_decl 
+%type <idlist>		comma_id_multi
+%type <stmtlist>	statement_multi
+%type <stmt>		statement
+%type <expr>		expr exprindex exprnotindex
+%type <argslist> 	args comma_expr_multi
+%type <type>		type_void type
+%type <exprtype>		id_int_bool
 
 %nonassoc EXPR1REDUCE
-%nonassoc IF ELSE
+%nonassoc IF 
+%nonassoc ELSE
 
-%right ASSIGN
 %left OP1
 %left OP2
 %left OP3
 %left OP4
-%left COMMA
-%right NOT
-%left OSQUARE DOTLENGTH
+%right ASSIGN
+%left OSQUARE
+%left OBRACE
+%left NOT
+%left DOTLENGTH
 %right UNARY
 
 %start start
@@ -67,10 +96,7 @@ field_decl
 	;
 	
 method_decl
-	:	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE CBRACE										{$$ = insertMethodDecl($3, $4, $6, NULL, NULL);}
-	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_decl statement_multi CBRACE		{$$ = insertMethodDecl($3, $4, $6, $9, $10);}
-	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_decl CBRACE						{$$ = insertMethodDecl($3, $4, $6, $9, NULL);}
-	|	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE statement_multi CBRACE						{$$ = insertMethodDecl($3, $4, $6, $9, NULL);}
+	:	PUBLIC STATIC type_void ID OCURV formal_params CCURV OBRACE multi_var_decl statement_multi CBRACE		{$$ = insertMethodDecl($3, $4, $6, $9, $10);}
 	;
 	
 type_void
@@ -93,16 +119,16 @@ type
 	:	INT										{$$ = INT_T;}
 	|	BOOL									{$$ = BOOL_T;}
 	|	INT OSQUARE CSQUARE						{$$ = INTARRAY;}
-	|	BOOL OSQUARE CSQUARE					{$$ = BOOLRRAY;}
+	|	BOOL OSQUARE CSQUARE					{$$ = BOOLARRAY;}
 	;
 	
 multi_var_decl
-	:	var_decl								{$$ = $1}
-	|	multi_var_decl var_decl					{$$ = insertVarDeclList($2, $1)}
+	:	multi_var_decl var_decl					{$$ = insertVarDeclList($2, $1);}
+	|											{$$ = NULL;}
 	;
 	
 var_decl
-	:	type ID comma_id_multi SEMIC		{$$ = insertVarDecl($1, $2, $3, 0)}
+	:	type ID comma_id_multi SEMIC		{$$ = insertVarDecl($1, $2, $3, 0);}
 	;
 
 comma_id_multi
@@ -111,64 +137,64 @@ comma_id_multi
 	;
 	
 statement
-    :   OBRACE CBRACE                                   {$$=insertStatement(NULL,NULL,NULL,NULL,NULL,NULL);}
-    |   OBRACE statement_multi CBRACE                   {$$=insertStatement(NULL,$2,NULL,NULL,NULL,NULL);}
-    |   IF OCURV expr CCURV statement                   {$$=insertStatement(IFELSE,NULL,$3,NULL,$5,NULL);}
-    |   IF OCURV expr CCURV statement ELSE statement    {$$=insertStatement(IFELSE,NULL,$3,NULL,$5,$7);}
+    :   OBRACE statement_multi CBRACE				    {$$=insertStatement(NULL,$2,NULL,NULL,NULL,NULL);}
+	|   IF OCURV expr CCURV statement ELSE statement  %prec ELSE   {$$=insertStatement(IFELSE,NULL,$3,NULL,$5,$7);}    
+	|   IF OCURV expr CCURV statement     	%prec IF	    	{$$=insertStatement(IFELSE,NULL,$3,NULL,$5,NULL);}
     |   WHILE OCURV expr CCURV statement                {$$=insertStatement(WHILE_T,NULL,$3,NULL,$5,NULL);}
     |   PRINT OCURV expr CCURV SEMIC                    {$$=insertStatement(PRINT_T,NULL,$3,NULL,NULL,NULL);}
-    |   ID ASSIGN expr SEMIC                            {$$=insertStatement(STORE,NULL,$3,NULL,$5,NULL);}
+    |   ID ASSIGN expr SEMIC                            {$$=insertStatement(STORE,NULL,$3,NULL,NULL,NULL);}
     |   ID OSQUARE expr CSQUARE ASSIGN expr SEMIC       {$$=insertStatement(STOREARRAY,NULL,$3,$6,NULL,NULL);}
     |   RETURN SEMIC                                    {$$=insertStatement(RETURN_T,NULL,NULL,NULL,NULL,NULL);}
     |   RETURN expr SEMIC                               {$$=insertStatement(RETURN_T,NULL,$2,NULL,NULL,NULL);}
     ;
     
 statement_multi     
-    :   statement_multi statement   {$$=insertListStatement($2,$1)}
-    |                               {$$=NULL}  
+    :   statement_multi statement   {$$ = insertListStatement($2,$1);}
+    |                               {$$ = NULL;}  
     ;
 	
 expr
-	:	exprindex	%prec EXPR1REDUCE			  					
-	|	exprindex OSQUARE expr CSQUARE  				                        
-	|	exprnotindex	
-	
-	
-exprindex
-	:	expr OP1 expr    
-	|	expr OP2 expr
-  	|	expr OP3 expr
-  	|	expr OP4 expr
-    |	id_int_bool                         
-    |	OCURV expr CCURV                    
-    |	expr DOTLENGTH                  
-    |	NOT expr          %prec UNARY  
-	|	OP3 expr
-    |	PARSEINT OCURV ID OSQUARE expr CSQUARE CCURV
-    |	ID OCURV CCURV
-	|	ID OCURV args CCURV
+    :   exprindex   %prec EXPR1REDUCE                   {$$=$1;}                  
+    |   exprindex OSQUARE expr CSQUARE                  {$$=insertExpression(INDEX,NULL,$1,$3,NULL);}                        
+    |   exprnotindex                                    {$$=$1;}
 	;
+    
+    
+exprindex
+    :   expr OP1 expr                                   {$$=insertExpression(BINOP,checkOP($2),$1,$3,NULL);}
+    |   expr OP2 expr                                   {$$=insertExpression(BINOP,checkOP($2),$1,$3,NULL);}
+    |   expr OP3 expr                                   {$$=insertExpression(BINOP,checkOP($2),$1,$3,NULL);}
+    |   expr OP4 expr                                   {$$=insertExpression(BINOP,checkOP($2),$1,$3,NULL);}
+    |   id_int_bool                                     {$$=insertExpression($1,NULL,NULL,NULL,NULL);}
+    |   OCURV expr CCURV                                {$$=$2;}
+    |   expr DOTLENGTH                                  {$$=insertExpression(UNOP,checkOP($2),$1,NULL,NULL);}
+    |   NOT expr          %prec UNARY                   {$$=insertExpression(UNOP,checkOP($1),$2,NULL,NULL);}
+    |   OP3 expr                                        {$$=insertExpression(UNOP,checkOP($1),$2,NULL,NULL);}
+    |   PARSEINT OCURV ID OSQUARE expr CSQUARE CCURV    {$$=insertExpression(PARSEINT_T,NULL,$5,NULL,NULL);}
+    |   ID OCURV CCURV                                  {$$=insertExpression(CALL,NULL,NULL,NULL,NULL);}
+    |   ID OCURV args CCURV                             {$$=insertExpression(CALL,NULL,NULL,NULL,$3);}
+    ;
 
 exprnotindex
-	:	NEW INT OSQUARE expr CSQUARE      
-	|	NEW BOOL OSQUARE expr CSQUARE      
+    :   NEW INT OSQUARE expr CSQUARE                    {$$=insertExpression(NEWINTARR,NULL,$4,NULL,NULL);}
+    |   NEW BOOL OSQUARE expr CSQUARE                   {$$=insertExpression(NEWBOOLARR,NULL,$4,NULL,NULL);}
     ;
+
 
 	
 id_int_bool
-	:	ID
-	|	INTLIT
-	|	BOOLLIT
+	:	ID								{$$ = ID_T;}
+	|	INTLIT							{$$ = INTLIT_T;}
+	|	BOOLLIT							{$$ = BOOLLIT_T;}
 	;
 
 args
-	:	expr
-	|	expr comma_expr_multi
+	:	expr comma_expr_multi			{$$ = insertArgs($1, $2);}
 	;
 	
 comma_expr_multi
-	:	COMMA expr
-	|	comma_expr_multi COMMA expr
+	:	comma_expr_multi COMMA expr		{$$ = insertArgs($3, $1);}
+	|									{$$ = NULL;}
 	;
 
 	
