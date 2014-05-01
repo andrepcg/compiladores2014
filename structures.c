@@ -113,9 +113,9 @@ MethodDecl* insertMethodDecl(Type tipo, char *id, ParamList *parametros, VarDecl
 	
 	newMethod->tipo = tipo;
 	newMethod->id = id;
-	newMethod->parametros = (ParamList*) parametros;
-	newMethod->declaracoes = (VarDeclList*) declaracoes;
-	newMethod->stmts = (StmtList*) stmts;
+	newMethod->parametros = parametros;
+	newMethod->declaracoes = declaracoes;
+	newMethod->stmts = stmts;
 	
 	return newMethod;
 }
