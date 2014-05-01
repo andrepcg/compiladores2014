@@ -111,22 +111,22 @@ comma_id_multi
 	;
 	
 statement
-	:	OBRACE CBRACE
-	|	OBRACE statement_multi CBRACE
-	|	IF OCURV expr CCURV statement
-	|	IF OCURV expr CCURV statement ELSE statement
-	|	WHILE OCURV expr CCURV statement
-	|	PRINT OCURV expr CCURV SEMIC
-	|	ID ASSIGN expr SEMIC
-	|	ID OSQUARE expr CSQUARE ASSIGN expr SEMIC
-	|	RETURN SEMIC
-	|	RETURN expr SEMIC
-	;
-	
-statement_multi
-	:	statement
-	|	statement_multi statement
-	;
+    :   OBRACE CBRACE                                   {$$=insertStatement(NULL,NULL,NULL,NULL,NULL,NULL);}
+    |   OBRACE statement_multi CBRACE                   {$$=insertStatement(NULL,$2,NULL,NULL,NULL,NULL);}
+    |   IF OCURV expr CCURV statement                   {$$=insertStatement(IFELSE,NULL,$3,NULL,$5,NULL);}
+    |   IF OCURV expr CCURV statement ELSE statement    {$$=insertStatement(IFELSE,NULL,$3,NULL,$5,$7);}
+    |   WHILE OCURV expr CCURV statement                {$$=insertStatement(WHILE_T,NULL,$3,NULL,$5,NULL);}
+    |   PRINT OCURV expr CCURV SEMIC                    {$$=insertStatement(PRINT_T,NULL,$3,NULL,NULL,NULL);}
+    |   ID ASSIGN expr SEMIC                            {$$=insertStatement(STORE,NULL,$3,NULL,$5,NULL);}
+    |   ID OSQUARE expr CSQUARE ASSIGN expr SEMIC       {$$=insertStatement(STOREARRAY,NULL,$3,$6,NULL,NULL);}
+    |   RETURN SEMIC                                    {$$=insertStatement(RETURN_T,NULL,NULL,NULL,NULL,NULL);}
+    |   RETURN expr SEMIC                               {$$=insertStatement(RETURN_T,NULL,$2,NULL,NULL,NULL);}
+    ;
+    
+statement_multi     
+    :   statement_multi statement   {$$=insertListStatement($2,$1)}
+    |                               {$$=NULL}  
+    ;
 	
 expr
 	:	exprindex	%prec EXPR1REDUCE			  					
