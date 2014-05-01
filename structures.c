@@ -31,14 +31,14 @@ DeclList* insertDecl(DeclType type, void* decl, DeclList* list)
     return list;
 }
 
-ParamList* insertFormalParam(Type tipo, char *id, ParamList *lista, int isHead){
+ParamList* insertFormalParam(Type tipo, char *id, ParamList *lista){
 
 	ParamList *novo = (ParamList*) malloc(sizeof(ParamList));
 	
 	novo->tipo = tipo;
 	novo->id = id;
-	
-	if(!isHead)
+
+	if(lista == NULL)
 		return novo;
 		
 	ParamList* aux = lista;
@@ -158,6 +158,9 @@ ArgsList* insertArgs(Expr *expr, ArgsList *lista){
 
 	ArgsList *new = (ArgsList*) malloc(sizeof(ArgsList));
 	new->expr = expr;
+	new->next = lista;
+	
+	/*
 	new->next = NULL;
 	
 	if(lista == NULL)
@@ -168,6 +171,7 @@ ArgsList* insertArgs(Expr *expr, ArgsList *lista){
     aux->next = new;
 
     return lista;
+	*/
 	
 }
 

@@ -105,13 +105,13 @@ type_void
 	;
 
 formal_params
-	:	type ID comma_type_id_multi				{$$ = insertFormalParam($1, $2, $3, 1);}
-	|	STRING OSQUARE CSQUARE ID				{$$ = insertFormalParam(STRINGARRAY, $4, NULL, 1);}
+	:	type ID comma_type_id_multi				{$$ = insertFormalParam($1, $2, $3);}
+	|	STRING OSQUARE CSQUARE ID				{$$ = insertFormalParam(STRINGARRAY, $4, NULL);}
 	|											{$$ = NULL;}
 	;
 	
 comma_type_id_multi
-	:	comma_type_id_multi COMMA type ID		{$$ = insertFormalParam($3, $4, $1, 0);}
+	:	comma_type_id_multi COMMA type ID		{$$ = insertFormalParam($3, $4, $1);}
 	|											{$$ = NULL;}
 	;
 	
@@ -218,9 +218,10 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	/*
+	
 	if(printTree)
-		printProgram(myProgram);
+		printClass(programa);
+		/*
 	if(printSymbols)
 		printSymbolTables(symbolsTable);*/
 

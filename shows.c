@@ -7,12 +7,13 @@
 
 void printClass(Class* class){
     printf("Program\n");
-    printf("\tId(%s)\n", class->id);
+    printf("  Id(%s)\n", class->id);
 
     if(class->declaracoes != NULL)
         printDeclList(class->declaracoes);
     else
-        printf("\tNULL\n");
+        printf("  NULL\n");
+
 }
 
 void printDeclList(DeclList* list)
@@ -30,7 +31,9 @@ void printDeclList(DeclList* list)
 void printMethodDecl(MethodDecl *method){
 	print("MethodDecl", 1, 1);
 	
-	print(idFormat(typeToString(method->tipo)), 2, 1);
+	//print(idFormat(typeToString(method->tipo)), 2, 1);
+	print(typeToString(method->tipo), 2, 1);
+	print(idFormat(method->id), 2, 1);
 	
 	if(method->parametros != NULL)
 		printMethodParams(method->parametros, 2);
@@ -44,8 +47,8 @@ void printMethodParams(ParamList *params, int level){
 	ParamList* aux = params;
     for(; aux != NULL; aux = aux->next){
 		print("ParamDeclaration", level + 1, 1);
-		print(typeToString(params->tipo), level + 2, 1);
-		print(idFormat(params->id), level + 2, 1);
+		print(typeToString(aux->tipo), level + 2, 1);
+		print(idFormat(aux->id), level + 2, 1);
 	}
 }
 
@@ -57,7 +60,7 @@ void print(char *s, int level, int linebreak){
 	for(i = 0; i < INDENT * level; i++){
 		spaces[i] = ' ';
 		if(i == INDENT * level - 1)
-            spaces[i] = '\0';
+            spaces[i + 1] = '\0';
 	}
 		
 	printf("%s%s%c", spaces, s, lb);

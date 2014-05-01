@@ -93,7 +93,7 @@ typedef struct _class {
 
 Class* createClass(char *id, DeclList *declaracoes);
 DeclList* insertDecl(DeclType type, void* decl, DeclList* list);
-ParamList* insertFormalParam(Type tipo, char *id, ParamList *lista, int isHead);
+ParamList* insertFormalParam(Type tipo, char *id, ParamList *lista);
 IDList* insertIDList(char *id, IDList *listaIDs);
 VarDecl* insertVarDecl(Type tipo, char *id, IDList *listaIDs, int iStatic);
 VarDecl* setStatic(void *vardecl, int a);
