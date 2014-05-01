@@ -97,7 +97,7 @@ ParamList* insertFormalParam(Type tipo, char *id, ParamList *lista, int isHead);
 IDList* insertIDList(char *id, IDList *listaIDs);
 VarDecl* insertVarDecl(Type tipo, char *id, IDList *listaIDs, int iStatic);
 VarDeclList* insertVarDeclList(VarDecl *vardecl, VarDeclList *listaDecl);
-Expr *insertExpression(ExprType type,OpType op,Expr *expr1,Expr *expr2,ArgsList *argsList);
+Expr *insertExpression(ExprType type,char *op,Expr *expr1,Expr *expr2,ArgsList *argsList);
 OpType checkOP(char *op);
 ArgsList* insertArgs(Expr *expr, ArgsList *lista);
 StmtList *insertListStatement(Statement *stmt,StmtList *lista);
