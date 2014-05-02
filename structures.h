@@ -13,6 +13,7 @@ typedef struct _expr
 {
     ExprType type;
     OpType op;
+	char *idLit;
 	struct _expr *expr1;
 	struct _expr *expr2;
 	ArgsList *argsList;
@@ -98,7 +99,7 @@ IDList* insertIDList(char *id, IDList *listaIDs);
 VarDecl* insertVarDecl(Type tipo, char *id, IDList *listaIDs, int iStatic);
 VarDecl* setStatic(void *vardecl, int a);
 VarDeclList* insertVarDeclList(VarDecl *vardecl, VarDeclList *listaDecl);
-Expr *insertExpression(ExprType type,char *op,Expr *expr1,Expr *expr2,ArgsList *argsList);
+Expr *insertExpression(ExprType type, char *idLit, char *op, Expr *expr1, Expr *expr2, ArgsList *argsList);
 OpType checkOP(char *op);
 ArgsList* insertArgs(Expr *expr, ArgsList *lista);
 StmtList *insertListStatement(Statement *stmt,StmtList *lista);

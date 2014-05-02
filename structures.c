@@ -67,14 +67,11 @@ IDList* insertIDList(char *id, IDList *listaIDs){
 
 VarDecl* insertVarDecl(Type tipo, char *id, IDList *listaIDs, int iStatic){
 	VarDecl *newVar = (VarDecl*) malloc(sizeof(VarDecl));
-
-	newVar->iStatic = iStatic;
-	newVar->idList = listaIDs;
-	
-	if(listaIDs == NULL)
-		return newVar;
-		
 	IDList *n = (IDList*) malloc(sizeof(IDList));
+	
+	newVar->iStatic = iStatic;
+	newVar->tipo = tipo;
+	
 	n->id = id;
 	n->next = listaIDs;
 	
@@ -135,13 +132,13 @@ Statement *insertStatement(StmtType tipo, char* id, StmtList *stmts, Expr *expr,
 
 }
 
-StmtList *insertListStatement(Statement *stmt,StmtList *lista){
+StmtList *insertListStatement(Statement *stmt, StmtList *lista){
     StmtList* novo = (StmtList*) malloc(sizeof(StmtList));
     
-    novo->stmt=stmt;
-    novo->next=lista;
+    novo->stmt = stmt;
+    novo->next = NULL;
 
-    if(lista==NULL)
+    if(lista == NULL)
         return novo;
 
 
@@ -158,9 +155,6 @@ ArgsList* insertArgs(Expr *expr, ArgsList *lista){
 
 	ArgsList *new = (ArgsList*) malloc(sizeof(ArgsList));
 	new->expr = expr;
-	new->next = lista;
-	
-	/*
 	new->next = NULL;
 	
 	if(lista == NULL)
@@ -171,19 +165,19 @@ ArgsList* insertArgs(Expr *expr, ArgsList *lista){
     aux->next = new;
 
     return lista;
-	*/
 	
 }
 
-Expr *insertExpression(ExprType type,char *op, Expr *expr1,Expr *expr2,ArgsList *argsList){
+Expr *insertExpression(ExprType type, char *idLit, char *op, Expr *expr1, Expr *expr2, ArgsList *argsList){
     Expr *novo = (Expr*) malloc(sizeof(Expr));
     novo->type = type;
+	novo->idLit = idLit;
     novo->op = (op != NULL) ? checkOP(op) : -1;
     novo->expr1 =  expr1;
     novo->expr2 = expr2;
     novo->argsList = argsList;
 
-    return novo;
+    return novo; 
 }
 
 OpType checkOP(char *op){

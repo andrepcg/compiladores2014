@@ -53,7 +53,6 @@ Class *programa;
 %type <expr>		expr exprindex exprnotindex
 %type <argslist> 	args comma_expr_multi
 %type <type>		type_void type
-%type <exprtype>		id_int_bool
 
 %nonassoc EXPR1REDUCE
 %nonassoc IF 
@@ -155,38 +154,32 @@ statement_multi
 	
 expr
     :   exprindex   %prec EXPR1REDUCE                   {$$=$1;}                  
-    |   exprindex OSQUARE expr CSQUARE                  {$$=insertExpression(INDEX,NULL,$1,$3,NULL);}                        
+    |   exprindex OSQUARE expr CSQUARE                  {$$=insertExpression(INDEX,NULL, NULL,$1,$3,NULL);}                        
     |   exprnotindex                                    {$$=$1;}
 	;
     
     
 exprindex
-    :   expr OP1 expr                                   {$$=insertExpression(BINOP,$2,$1,$3,NULL);}
-    |   expr OP2 expr                                   {$$=insertExpression(BINOP,$2,$1,$3,NULL);}
-    |   expr OP3 expr                                   {$$=insertExpression(BINOP,$2,$1,$3,NULL);}
-    |   expr OP4 expr                                   {$$=insertExpression(BINOP,$2,$1,$3,NULL);}
-    |   id_int_bool                                     {$$=insertExpression($1,NULL,NULL,NULL,NULL);}
-    |   OCURV expr CCURV                                {$$=$2;}
-    |   expr DOTLENGTH                                  {$$=insertExpression(UNOP,$2,$1,NULL,NULL);}
-    |   NOT expr          %prec UNARY                   {$$=insertExpression(UNOP,$1,$2,NULL,NULL);}
-    |   OP3 expr                                        {$$=insertExpression(UNOP,$1,$2,NULL,NULL);}
-    |   PARSEINT OCURV ID OSQUARE expr CSQUARE CCURV    {$$=insertExpression(PARSEINT_T,NULL,$5,NULL,NULL);}
-    |   ID OCURV CCURV                                  {$$=insertExpression(CALL,NULL,NULL,NULL,NULL);}
-    |   ID OCURV args CCURV                             {$$=insertExpression(CALL,NULL,NULL,NULL,$3);}
+    :   expr OP1 expr                                   {$$=insertExpression(BINOP, NULL,$2,$1,$3,NULL);}
+    |   expr OP2 expr                                   {$$=insertExpression(BINOP, NULL,$2,$1,$3,NULL);}
+    |   expr OP3 expr                                   {$$=insertExpression(BINOP, NULL,$2,$1,$3,NULL);}
+    |   expr OP4 expr                                   {$$=insertExpression(BINOP, NULL,$2,$1,$3,NULL);}
+    |	ID												{$$=insertExpression(ID_T, $1, NULL,NULL,NULL,NULL);}
+	|	INTLIT											{$$=insertExpression(INTLIT_T, $1, NULL,NULL,NULL,NULL);}
+	|	BOOLLIT											{$$=insertExpression(BOOLLIT_T, $1, NULL,NULL,NULL,NULL);}
+	|   OCURV expr CCURV                                {$$=$2;}
+    |   expr DOTLENGTH                                  {$$=insertExpression(UNOP, NULL,$2,$1,NULL,NULL);}
+    |   NOT expr          %prec UNARY                   {$$=insertExpression(UNOP, NULL,$1,$2,NULL,NULL);}
+    |   OP3 expr                                        {$$=insertExpression(UNOP, NULL,$1,$2,NULL,NULL);}
+    |   PARSEINT OCURV ID OSQUARE expr CSQUARE CCURV    {$$=insertExpression(PARSEINT_T, $2,NULL,$5,NULL,NULL);}
+    |   ID OCURV CCURV                                  {$$=insertExpression(CALL, NULL,NULL,NULL,NULL,NULL);}
+    |   ID OCURV args CCURV                             {$$=insertExpression(CALL, NULL,NULL,NULL,NULL,$3);}
     ;
 
 exprnotindex
-    :   NEW INT OSQUARE expr CSQUARE                    {$$=insertExpression(NEWINTARR,NULL,$4,NULL,NULL);}
-    |   NEW BOOL OSQUARE expr CSQUARE                   {$$=insertExpression(NEWBOOLARR,NULL,$4,NULL,NULL);}
+    :   NEW INT OSQUARE expr CSQUARE                    {$$=insertExpression(NEWINTARR,NULL,NULL,$4,NULL,NULL);}
+    |   NEW BOOL OSQUARE expr CSQUARE                   {$$=insertExpression(NEWBOOLARR,NULL,NULL,$4,NULL,NULL);}
     ;
-
-
-	
-id_int_bool
-	:	ID								{$$ = ID_T;}
-	|	INTLIT							{$$ = INTLIT_T;}
-	|	BOOLLIT							{$$ = BOOLLIT_T;}
-	;
 
 args
 	:	expr comma_expr_multi			{$$ = insertArgs($1, $2);}

@@ -31,13 +31,187 @@ void printDeclList(DeclList* list)
 void printMethodDecl(MethodDecl *method){
 	print("MethodDecl", 1, 1);
 	
-	//print(idFormat(typeToString(method->tipo)), 2, 1);
 	print(typeToString(method->tipo), 2, 1);
-	print(idFormat(method->id), 2, 1);
+	print(idIntFormat(0, method->id), 2, 1);
 	
 	if(method->parametros != NULL)
 		printMethodParams(method->parametros, 2);
+		
+	printMethodBody(method);
 	
+	
+	
+}
+
+void printMethodBody(MethodDecl *method){
+	print("MethodBody", 1, 1);
+	
+	if(method->declaracoes != NULL)
+		printMethodDeclarations(method->declaracoes, 2);
+	
+	if(method->stmts != NULL)
+		printMethodStmts(method->stmts, 2);
+}
+
+void printMethodStmts(StmtList *stmts, int level){
+
+	StmtList* aux = stmts;
+    for(; aux != NULL; aux = aux->next){
+		printStatement(aux->stmt,level+1);
+	}
+
+}
+
+void printMethodDeclarations(VarDeclList *declaracoes,int level){
+    
+    VarDeclList* aux = declaracoes;
+    for(; aux != NULL; aux = aux->next){
+
+        IDList* auxID = aux->declaracao->idList ;
+        for(; auxID != NULL; auxID = auxID->next){
+            printVarDecl(aux->declaracao->tipo, auxID->id, level + 1);
+        }
+
+    }
+
+}
+
+void printStatement(Statement *stmt,int level){
+
+	if(stmt == NULL)
+		print("Null", level, 1);
+		
+    print(StmtTypeToString(stmt->tipo),level,1);
+	
+    if(stmt->tipo==IFELSE){
+
+        printExpression(stmt->expr1,level+1);
+        printStatement(stmt->stmt1,level+1);
+		
+        if(stmt->stmt2!=NULL)
+            printStatement(stmt->stmt2,level+1);
+    }
+    else if(stmt->tipo==CSTAT){
+        printMethodStmts(stmt->stmts,level);
+    }
+    else if(stmt->tipo==RETURN_T){
+        if(stmt->expr1!=NULL)
+            printExpression(stmt->expr1,level+1);
+    }
+    else if(stmt->tipo==WHILE_T){
+        printExpression(stmt->expr1,level+1);
+        printStatement(stmt->stmt1,level+1);
+    }
+    else if(stmt->tipo==PRINT_T){
+        printExpression(stmt->expr1,level);
+        
+    }
+    else if(stmt->tipo==STORE){
+		print(idIntFormat(0, stmt->id),level + 1, 1);
+        printExpression(stmt->expr1,level);
+
+    }
+    else if(stmt->tipo==STOREARRAY){
+		print(idIntFormat(0, stmt->id),level + 1, 1);
+        printExpression(stmt->expr1, level);
+        printExpression(stmt->expr2, level);
+    }
+    
+}
+void printExpression(Expr *expr, int level){
+
+    if(expr->type == BINOP){
+		print(ExprTypeToString(expr->op, BINOP),level,1);
+        printExpression(expr->expr1,level);
+        printExpression(expr->expr2,level);
+    }
+    else if(expr->type == UNOP){
+        print(ExprTypeToString(expr->op, UNOP),level,1);
+		printExpression(expr->expr1, level);
+	}
+
+    else if(expr->type == ID_T)
+        print(idIntFormat(0, expr->idLit),level+1, 1);
+
+    else if(expr->type == INTLIT_T)
+        print(idIntFormat(1, expr->idLit),level+1, 1);
+    
+    else if(expr->type == BOOLLIT_T)
+        print(idIntFormat(2, expr->idLit),level+1, 1);
+    
+    else if(expr->type == CALL){
+        printExpression(expr->expr1,level+1);
+    }
+    else if(expr->type == PARSEINT_T){
+		print("ParseArgs", level + 1, 1);
+        print(idIntFormat(0, expr->idLit),level+2, 1);
+        printExpression(expr->expr1,level+1);
+    }
+    else if(expr->type == INDEX){
+		print("LoadArray", level + 1, 1);
+        printExpression(expr->expr1,level+1);
+        printExpression(expr->expr2,level+1);
+    }
+    else if(expr->type == NEWINTARR){
+		print("NewInt", level + 1, 1);
+        printExpression(expr->expr1,level+1);
+    }
+    else if(expr->type == NEWBOOLARR){
+		print("NewBool", level + 1, 1);
+        printExpression(expr->expr1,level+1);
+    }
+}
+
+
+char* ExprTypeToString(OpType type, ExprType op)
+{
+    char *temp = (char*) malloc(sizeof(char) * 7);
+    if(type == PLUS)
+		if(op == BINOP)
+			temp = "Add";
+		else
+			temp = "Plus";
+			
+    else if(type == MINUS)
+        if(op == BINOP)
+			temp = "Sub";
+		else
+			temp = "Minus";
+			
+    else if(type == MUL)
+        temp = "Mul";
+    else if(type == DIV)
+        temp = "Div";
+    else if(type == MOD)
+        temp = "Mod";
+    else if(type == LESSER)
+        temp = "Lt";
+    else if(type == GREATER)
+        temp = "Gt";
+	else if(type == EQ)
+        temp = "Eq";
+    else if(type == LEQ)
+        temp = "Lq";
+    else if(type == GEQ)
+        temp = "Gq";
+    else if(type == DOTLENGTH_T)
+        temp = "Length";
+    else if(type == AND_T)
+        temp = "And";
+    else if(type == OR_T)
+        temp = "Or";
+    else if(type == NOT_)
+        temp = "Not";
+   
+
+    return temp;
+ }
+
+void printVarDecl(Type tipo, char *id, int level){
+    print("VarDecl",level, 1);
+    print(typeToString(tipo), level + 1,1);
+    print(idIntFormat(0, id), level + 1, 1);
+
 }
 
 void printMethodParams(ParamList *params, int level){
@@ -48,7 +222,7 @@ void printMethodParams(ParamList *params, int level){
     for(; aux != NULL; aux = aux->next){
 		print("ParamDeclaration", level + 1, 1);
 		print(typeToString(aux->tipo), level + 2, 1);
-		print(idFormat(aux->id), level + 2, 1);
+		print(idIntFormat(0, aux->id), level + 2, 1);
 	}
 }
 
@@ -67,9 +241,20 @@ void print(char *s, int level, int linebreak){
 	
 }
 
-char* idFormat(char *id){
+// idOrIntLit = 0 -> Id
+char* idIntFormat(int tipo, char *idLit){
 	char *tmp = (char*) malloc(sizeof(char) * 25);
-	sprintf(tmp, "Id(%s)", id);
+	char t[8];
+	
+	if(tipo == 0)
+		sprintf(t, "Id");
+	else if(tipo == 1)
+		sprintf(t, "IntLit");
+	else
+		sprintf(t, "BoolLit");
+		
+	
+	sprintf(tmp, "%s(%s)", t, idLit);
 	return tmp;
 }
 
@@ -88,6 +273,27 @@ char* typeToString(Type type)
         temp = "Void";
     else if(type == STRINGARRAY)
         temp = "StringArray";
+
+	return temp;
+}
+
+char* StmtTypeToString(StmtType type)
+{
+	char *temp = (char*) malloc(sizeof(char) * 13);
+    if(type == CSTAT)
+        temp = "CompoundStat";
+    else if(type == IFELSE)
+        temp = "IfElse";
+    else if(type == RETURN_T)
+		temp = "Return";
+    else if(type == WHILE_T)
+        temp = "While";
+    else if(type == PRINT_T)
+        temp = "Print";
+    else if(type == STORE)
+        temp = "Store";
+	else if(type == STOREARRAY)
+        temp = "StoreArray";
 
 	return temp;
 }
