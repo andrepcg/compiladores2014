@@ -171,7 +171,7 @@ exprindex
     |   expr DOTLENGTH                                  {$$=insertExpression(UNOP, NULL,$2,$1,NULL,NULL);}
     |   NOT expr          %prec UNARY                   {$$=insertExpression(UNOP, NULL,$1,$2,NULL,NULL);}
     |   OP3 expr                                        {$$=insertExpression(UNOP, NULL,$1,$2,NULL,NULL);}
-    |   PARSEINT OCURV ID OSQUARE expr CSQUARE CCURV    {$$=insertExpression(PARSEINT_T, $2,NULL,$5,NULL,NULL);}
+    |   PARSEINT OCURV ID OSQUARE expr CSQUARE CCURV    {$$=insertExpression(PARSEINT_T, $3,NULL,$5,NULL,NULL);}
     |   ID OCURV CCURV                                  {$$=insertExpression(CALL, NULL,NULL,NULL,NULL,NULL);}
     |   ID OCURV args CCURV                             {$$=insertExpression(CALL, NULL,NULL,NULL,NULL,$3);}
     ;
