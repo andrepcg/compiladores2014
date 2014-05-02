@@ -20,9 +20,14 @@ void printDeclList(DeclList* list)
 {
     DeclList* aux = list;
     for(; aux != NULL; aux = aux->next){
-        if(aux->tipo == VARDECL)
-			printVarDecl(aux->varDecl->tipo, aux->varDecl->idList->id, 1, 1);
-            //printFieldDecl(aux->varDecl);
+        if(aux->tipo == VARDECL){
+			//printVarDecl(aux->varDecl->tipo, aux->varDecl->idList->id, 1, 1);
+			
+			IDList* auxID = aux->varDecl->idList ;
+			for(; auxID != NULL; auxID = auxID->next){
+				printVarDecl(aux->varDecl->tipo, auxID->id, 1, 1);
+			}
+		}
         else if(aux->tipo == METHODDECL)
             printMethodDecl(aux->methodDecl);
     }
@@ -34,8 +39,7 @@ void printMethodDecl(MethodDecl *method){
 	print(typeToString(method->tipo), 2, 1);
 	print(idIntFormat(0, method->id), 2, 1);
 	
-	if(method->parametros != NULL)
-		printMethodParams(method->parametros, 2);
+	printMethodParams(method->parametros, 2);
 		
 	printMethodBody(method);
 	
@@ -44,13 +48,13 @@ void printMethodDecl(MethodDecl *method){
 }
 
 void printMethodBody(MethodDecl *method){
-	print("MethodBody", 1, 1);
+	print("MethodBody", 2, 1);
 	
 	if(method->declaracoes != NULL)
-		printMethodDeclarations(method->declaracoes, 2);
+		printMethodDeclarations(method->declaracoes, 3);
 	
 	if(method->stmts != NULL)
-		printMethodStmts(method->stmts, 2);
+		printMethodStmts(method->stmts, 3);
 }
 
 void printMethodStmts(StmtList *stmts, int level){
@@ -78,8 +82,10 @@ void printMethodDeclarations(VarDeclList *declaracoes,int level){
 
 void printStatement(Statement *stmt,int level){
 
-	if(stmt == NULL)
+	if(stmt == NULL){
 		print("Null", level, 1);
+		return;
+	}
 		
     print(StmtTypeToString(stmt->tipo),level,1);
 	
@@ -87,15 +93,13 @@ void printStatement(Statement *stmt,int level){
 
         printExpression(stmt->expr1,level+1);
         printStatement(stmt->stmt1,level+1);
-		
-        if(stmt->stmt2!=NULL)
-            printStatement(stmt->stmt2,level+1);
+        printStatement(stmt->stmt2,level+1);
     }
     else if(stmt->tipo==CSTAT){
         printMethodStmts(stmt->stmts,level);
     }
     else if(stmt->tipo==RETURN_T){
-        if(stmt->expr1!=NULL)
+        if(stmt->expr1 != NULL)
             printExpression(stmt->expr1,level+1);
     }
     else if(stmt->tipo==WHILE_T){
@@ -140,6 +144,7 @@ void printExpression(Expr *expr, int level){
         print(idIntFormat(2, expr->idLit),level+1, 1);
     
     else if(expr->type == CALL){
+		print("Call", level, 1);
         printExpression(expr->expr1,level+1);
     }
     else if(expr->type == PARSEINT_T){
@@ -209,8 +214,8 @@ char* ExprTypeToString(OpType type, ExprType op)
 
 void printVarDecl(Type tipo, char *id, int iStatic, int level){
     print("VarDecl",level, 1);
-	if(iStatic)
-		print("Static", level + 1, 1);
+	//if(iStatic)
+		//print("Static", level + 1, 1);
     print(typeToString(tipo), level + 1, 1);
     print(idIntFormat(0, id), level + 1, 1);
 

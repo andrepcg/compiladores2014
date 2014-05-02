@@ -60,7 +60,7 @@ ParamList* insertFormalParam(Type tipo, char *id, ParamList *lista, int isHead){
 IDList* insertIDList(char *id, IDList *listaIDs){
 	IDList* newId = (IDList*) malloc(sizeof(IDList));
     newId->id = id;
-    newId->next = listaIDs;
+    newId->next = NULL;
 	
 	if(listaIDs == NULL)
 		return newId;
@@ -125,7 +125,14 @@ MethodDecl* insertMethodDecl(Type tipo, char *id, ParamList *parametros, VarDecl
 }
 
 Statement *insertStatement(StmtType tipo, char* id, StmtList *stmts, Expr *expr, Expr *expr2, Statement *stmt1, Statement *stmt2){
-    Statement *novo = (Statement*) malloc(sizeof(Statement));
+    
+	if(tipo == CSTAT)
+		if(stmts == NULL)
+			return NULL;
+		else if(stmts->next == NULL)
+			return stmts->stmt;
+	
+	Statement *novo = (Statement*) malloc(sizeof(Statement));
     novo->tipo = tipo;
 	novo->id = id;
     novo->stmts = stmts;
