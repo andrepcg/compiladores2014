@@ -21,8 +21,8 @@ void printDeclList(DeclList* list)
     DeclList* aux = list;
     for(; aux != NULL; aux = aux->next){
         if(aux->tipo == VARDECL)
+			printVarDecl(aux->varDecl->tipo, aux->varDecl->idList->id, 1, 1);
             //printFieldDecl(aux->varDecl);
-			return;
         else if(aux->tipo == METHODDECL)
             printMethodDecl(aux->methodDecl);
     }
@@ -69,7 +69,7 @@ void printMethodDeclarations(VarDeclList *declaracoes,int level){
 
         IDList* auxID = aux->declaracao->idList ;
         for(; auxID != NULL; auxID = auxID->next){
-            printVarDecl(aux->declaracao->tipo, auxID->id, level + 1);
+            printVarDecl(aux->declaracao->tipo, auxID->id, 0, level + 1);
         }
 
     }
@@ -207,9 +207,11 @@ char* ExprTypeToString(OpType type, ExprType op)
     return temp;
  }
 
-void printVarDecl(Type tipo, char *id, int level){
+void printVarDecl(Type tipo, char *id, int iStatic, int level){
     print("VarDecl",level, 1);
-    print(typeToString(tipo), level + 1,1);
+	if(iStatic)
+		print("Static", level + 1, 1);
+    print(typeToString(tipo), level + 1, 1);
     print(idIntFormat(0, id), level + 1, 1);
 
 }

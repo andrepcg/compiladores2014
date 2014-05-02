@@ -104,7 +104,6 @@ OpType checkOP(char *op);
 ArgsList* insertArgs(Expr *expr, ArgsList *lista);
 StmtList *insertListStatement(Statement *stmt,StmtList *lista);
 Statement *insertStatement(StmtType tipo, char* id, StmtList *stmts,Expr *expr,Expr *expr2,Statement *stmt1,Statement *stmt2);
-
-
+MethodDecl* insertMethodDecl(Type tipo, char *id, ParamList *parametros, VarDeclList *declaracoes, StmtList *stmts);
 
 #endif
