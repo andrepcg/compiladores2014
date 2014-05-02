@@ -12,6 +12,7 @@ extern int yyleng;
 extern char *yytext;
 
 int yydebug=0;
+int erros = 0;
 
 void yyerror(char *s);
 int yylex(void);
@@ -104,13 +105,13 @@ type_void
 	;
 
 formal_params
-	:	type ID comma_type_id_multi				{$$ = insertFormalParam($1, $2, $3);}
-	|	STRING OSQUARE CSQUARE ID				{$$ = insertFormalParam(STRINGARRAY, $4, NULL);}
+	:	type ID comma_type_id_multi				{$$ = insertFormalParam($1, $2, $3, 1);}
+	|	STRING OSQUARE CSQUARE ID				{$$ = insertFormalParam(STRINGARRAY, $4, NULL, 1);}
 	|											{$$ = NULL;}
 	;
 	
 comma_type_id_multi
-	:	comma_type_id_multi COMMA type ID		{$$ = insertFormalParam($3, $4, $1);}
+	:	comma_type_id_multi COMMA type ID		{$$ = insertFormalParam($3, $4, $1, 0);}
 	|											{$$ = NULL;}
 	;
 	
@@ -212,7 +213,7 @@ int main(int argc, char *argv[])
 	}
 	
 	
-	if(printTree)
+	if(printTree && erros == 0)
 		printClass(programa);
 		/*
 	if(printSymbols)
@@ -224,4 +225,5 @@ int main(int argc, char *argv[])
 
 void yyerror(char *s) {
 	printf("Line %d, col %d: %s: %s\n", prevLineNo, prevColNo, s, yytext);
+	erros++;
 }
