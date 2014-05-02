@@ -165,20 +165,26 @@ StmtList *insertListStatement(Statement *stmt, StmtList *lista){
 }
 
 
-ArgsList* insertArgs(Expr *expr, ArgsList *lista){
+ArgsList* insertArgs(Expr *expr, ArgsList *lista, int isHead){
 
 	ArgsList *new = (ArgsList*) malloc(sizeof(ArgsList));
 	new->expr = expr;
 	new->next = NULL;
 	
-	if(lista == NULL)
-		return new;
-		
-	ArgsList* aux = lista;
-    for(; aux->next != NULL; aux = aux->next);
-    aux->next = new;
+	if(isHead){
+        new->next = lista;
+        return new;
+    }
 
-    return lista;
+    if(lista){
+		ArgsList* aux = lista;
+		for(; aux->next != NULL; aux = aux->next);
+		aux->next = new;
+
+		return lista;
+	}
+	else 
+		return new;
 	
 }
 
@@ -190,41 +196,44 @@ Expr *insertExpression(ExprType type, char *idLit, char *op, Expr *expr1, Expr *
     novo->expr1 =  expr1;
     novo->expr2 = expr2;
     novo->argsList = argsList;
+	
 
     return novo; 
 }
 
 OpType checkOP(char *op){
 
-    if(strcmp(op,"+")==0)
-        return PLUS;
-    else if(strcmp(op,"-")==0)
-        return MINUS;
-    else if(strcmp(op,"&&")==0)
+    if(strcmp(op, "&&") == 0)
         return AND_T;
-    else if(strcmp(op,"||")==0)
+    else if(strcmp(op, "||") == 0)
         return OR_T;
-    else if(strcmp(op,">")==0)
-        return GREATER;
-    else if(strcmp(op,"<")==0)
+    else if(strcmp(op, "<") == 0)
         return LESSER;
-    else if(strcmp(op,"==")==0)
-        return EQ;
-    else if(strcmp(op,"!=")==0)
-        return DIF;
-    else if(strcmp(op,"<=")==0)
+    else if(strcmp(op, ">") == 0)
+        return GREATER;
+    else if(strcmp(op, "<=") == 0)
         return LEQ;
-    else if(strcmp(op,">=")==0)
+    else if(strcmp(op, ">=") == 0)
         return GEQ;
-    else if(strcmp(op,"*")==0)
-        return MUL;
-    else if(strcmp(op,"/")==0)
-        return DIV;
-    else if(strcmp(op,"%")==0)
-        return MOD;
-    else if(strcmp(op,"!")==0)
+    else if(strcmp(op, "!=") == 0)
+        return DIF;
+    else if(strcmp(op, "==") == 0)
+        return EQ;
+    else if(strcmp(op, "!") == 0)
         return NOT_;
-    else if(strcmp(op,".length")==0)
+    else if(strcmp(op, "+") == 0)
+        return PLUS;
+    else if(strcmp(op, "-") == 0)
+        return MINUS;
+    else if(strcmp(op, "*") == 0)
+        return MUL;
+    else if(strcmp(op, "/") == 0)
+        return DIV;
+    else if(strcmp(op, "%") == 0)
+        return MOD;
+    else if(strcmp(op, ".length") == 0)
         return DOTLENGTH_T;
+
+    return -1;
 
 }

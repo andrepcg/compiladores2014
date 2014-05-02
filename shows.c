@@ -12,7 +12,7 @@ void printClass(Class* class){
     if(class->declaracoes != NULL)
         printDeclList(class->declaracoes);
     else
-        printf("  NULL\n");
+        print("NULL", 1, 1);
 
 }
 
@@ -21,11 +21,12 @@ void printDeclList(DeclList* list)
     DeclList* aux = list;
     for(; aux != NULL; aux = aux->next){
         if(aux->tipo == VARDECL){
-			//printVarDecl(aux->varDecl->tipo, aux->varDecl->idList->id, 1, 1);
-			
+
 			IDList* auxID = aux->varDecl->idList ;
-			for(; auxID != NULL; auxID = auxID->next){
-				printVarDecl(aux->varDecl->tipo, auxID->id, 1, 1);
+			printVarDecl(aux->varDecl->tipo, auxID->id, 0, 1);
+			
+			for(auxID = auxID->next; auxID != NULL; auxID = auxID->next){
+				print(idIntFormat(0, auxID->id), 2, 1);
 			}
 		}
         else if(aux->tipo == METHODDECL)
@@ -61,7 +62,7 @@ void printMethodStmts(StmtList *stmts, int level){
 
 	StmtList* aux = stmts;
     for(; aux != NULL; aux = aux->next){
-		printStatement(aux->stmt,level+1);
+		printStatement(aux->stmt,level);
 	}
 
 }
@@ -70,10 +71,13 @@ void printMethodDeclarations(VarDeclList *declaracoes,int level){
     
     VarDeclList* aux = declaracoes;
     for(; aux != NULL; aux = aux->next){
-
+		
         IDList* auxID = aux->declaracao->idList ;
-        for(; auxID != NULL; auxID = auxID->next){
-            printVarDecl(aux->declaracao->tipo, auxID->id, 0, level + 1);
+		printVarDecl(aux->declaracao->tipo, auxID->id, 0, level);
+		
+        for(auxID = auxID->next; auxID != NULL; auxID = auxID->next){
+			print(idIntFormat(0, auxID->id), level + 1, 1);
+            //printVarDecl(aux->declaracao->tipo, auxID->id, 0, level + 1);
         }
 
     }
@@ -90,13 +94,12 @@ void printStatement(Statement *stmt,int level){
     print(StmtTypeToString(stmt->tipo),level,1);
 	
     if(stmt->tipo==IFELSE){
-
         printExpression(stmt->expr1,level+1);
         printStatement(stmt->stmt1,level+1);
         printStatement(stmt->stmt2,level+1);
     }
     else if(stmt->tipo==CSTAT){
-        printMethodStmts(stmt->stmts,level);
+        printMethodStmts(stmt->stmts,level + 1);
     }
     else if(stmt->tipo==RETURN_T){
         if(stmt->expr1 != NULL)
@@ -112,7 +115,7 @@ void printStatement(Statement *stmt,int level){
     }
     else if(stmt->tipo==STORE){
 		print(idIntFormat(0, stmt->id),level + 1, 1);
-        printExpression(stmt->expr1,level);
+        printExpression(stmt->expr1,level + 1);
 
     }
     else if(stmt->tipo==STOREARRAY){
@@ -144,8 +147,9 @@ void printExpression(Expr *expr, int level){
         print(idIntFormat(2, expr->idLit),level+1, 1);
     
     else if(expr->type == CALL){
-		print("Call", level, 1);
-        printExpression(expr->expr1,level+1);
+		print("Call", level + 1, 1);
+        print(idIntFormat(0, expr->idLit),level+2, 1);
+        printArgs(expr->argsList,level+1);
     }
     else if(expr->type == PARSEINT_T){
 		print("ParseArgs", level + 1, 1);
@@ -167,23 +171,31 @@ void printExpression(Expr *expr, int level){
     }
 }
 
+void printArgs( ArgsList *argsList,int level){
+    ArgsList* aux = argsList;
+    for(; aux != NULL; aux = aux->next){
+        printExpression(aux->expr,level+1);
+
+    }
+}
 
 char* ExprTypeToString(OpType type, ExprType op)
 {
     char *temp = (char*) malloc(sizeof(char) * 7);
-    if(type == PLUS)
+    if(type == PLUS){
 		if(op == BINOP)
 			temp = "Add";
 		else
 			temp = "Plus";
 			
-    else if(type == MINUS)
+    }
+	else if(type == MINUS){
         if(op == BINOP)
 			temp = "Sub";
 		else
 			temp = "Minus";
 			
-    else if(type == MUL)
+    }else if(type == MUL)
         temp = "Mul";
     else if(type == DIV)
         temp = "Div";

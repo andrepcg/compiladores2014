@@ -173,8 +173,8 @@ exprindex
     |   NOT expr          %prec UNARY                   {$$=insertExpression(UNOP, NULL,$1,$2,NULL,NULL);}
     |   OP3 expr                                        {$$=insertExpression(UNOP, NULL,$1,$2,NULL,NULL);}
     |   PARSEINT OCURV ID OSQUARE expr CSQUARE CCURV    {$$=insertExpression(PARSEINT_T, $3,NULL,$5,NULL,NULL);}
-    |   ID OCURV CCURV                                  {$$=insertExpression(CALL, NULL,NULL,NULL,NULL,NULL);}
-    |   ID OCURV args CCURV                             {$$=insertExpression(CALL, NULL,NULL,NULL,NULL,$3);}
+    |   ID OCURV CCURV                                  {$$=insertExpression(CALL, $1,NULL,NULL,NULL,NULL);}
+    |   ID OCURV args CCURV                             {$$=insertExpression(CALL, $1,NULL,NULL,NULL,$3);}
     ;
 
 exprnotindex
@@ -183,11 +183,11 @@ exprnotindex
     ;
 
 args
-	:	expr comma_expr_multi			{$$ = insertArgs($1, $2);}
+	:	expr comma_expr_multi			{$$ = insertArgs($1, $2, 1);}
 	;
 	
 comma_expr_multi
-	:	comma_expr_multi COMMA expr		{$$ = insertArgs($3, $1);}
+	:	comma_expr_multi COMMA expr		{$$ = insertArgs($3, $1, 0);}
 	|									{$$ = NULL;}
 	;
 

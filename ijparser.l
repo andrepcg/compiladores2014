@@ -88,7 +88,7 @@ INTLIT		[0-9]+|0x[0-9a-fA-F]+
 {OP2}			{colCount(yyleng); yylval.token = strdup(yytext); return OP2;}
 {OP3}			{colCount(yyleng); yylval.token = strdup(yytext); return OP3;}
 {OP4}			{colCount(yyleng); yylval.token = strdup(yytext); return OP4;}
-{NOT}			{colCount(yyleng); return NOT;}
+{NOT}			{colCount(yyleng); yylval.token = strdup(yytext); return NOT;}
 {ASSIGN}		{colCount(yyleng); return ASSIGN;}
 {SEMIC}			{colCount(yyleng); return SEMIC;}
 {COMMA}			{colCount(yyleng); return COMMA;}

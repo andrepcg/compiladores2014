@@ -19,6 +19,7 @@ void print(char *s, int level, int linebreak);
 char* idIntFormat(int tipo, char *idLit);
 char* typeToString(Type type);
 char* StmtTypeToString(StmtType type);
+void printArgs( ArgsList *argsList,int level);
 
 
 #endif
