@@ -169,7 +169,7 @@ exprindex
 	|	INTLIT											{$$=insertExpression(INTLIT_T, $1, NULL,NULL,NULL,NULL);}
 	|	BOOLLIT											{$$=insertExpression(BOOLLIT_T, $1, NULL,NULL,NULL,NULL);}
 	|   OCURV expr CCURV                                {$$=$2;}
-    |   expr DOTLENGTH                                  {$$=insertExpression(UNOP, NULL,$2,$1,NULL,NULL);}
+    |   expr DOTLENGTH                                  {$$=insertExpression(UNOP, NULL,".length",$1,NULL,NULL);}
     |   NOT expr          %prec UNARY                   {$$=insertExpression(UNOP, NULL,$1,$2,NULL,NULL);}
     |   OP3 expr                                        {$$=insertExpression(UNOP, NULL,$1,$2,NULL,NULL);}
     |   PARSEINT OCURV ID OSQUARE expr CSQUARE CCURV    {$$=insertExpression(PARSEINT_T, $3,NULL,$5,NULL,NULL);}

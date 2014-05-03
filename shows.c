@@ -94,20 +94,20 @@ void printStatement(Statement *stmt,int level){
     print(StmtTypeToString(stmt->tipo),level,1);
 	
     if(stmt->tipo==IFELSE){
-        printExpression(stmt->expr1,level+1);
-        printStatement(stmt->stmt1,level+1);
-        printStatement(stmt->stmt2,level+1);
+        printExpression(stmt->expr1,level);
+        printStatement(stmt->stmt1,level + 1);
+        printStatement(stmt->stmt2,level + 1);
     }
     else if(stmt->tipo==CSTAT){
         printMethodStmts(stmt->stmts,level + 1);
     }
     else if(stmt->tipo==RETURN_T){
         if(stmt->expr1 != NULL)
-            printExpression(stmt->expr1,level+1);
+            printExpression(stmt->expr1,level);
     }
     else if(stmt->tipo==WHILE_T){
-        printExpression(stmt->expr1,level+1);
-        printStatement(stmt->stmt1,level+1);
+        printExpression(stmt->expr1,level);
+        printStatement(stmt->stmt1,level + 1);
     }
     else if(stmt->tipo==PRINT_T){
         printExpression(stmt->expr1,level);
@@ -115,7 +115,7 @@ void printStatement(Statement *stmt,int level){
     }
     else if(stmt->tipo==STORE){
 		print(idIntFormat(0, stmt->id),level + 1, 1);
-        printExpression(stmt->expr1,level + 1);
+        printExpression(stmt->expr1, level);
 
     }
     else if(stmt->tipo==STOREARRAY){
@@ -128,13 +128,13 @@ void printStatement(Statement *stmt,int level){
 void printExpression(Expr *expr, int level){
 
     if(expr->type == BINOP){
-		print(ExprTypeToString(expr->op, BINOP),level,1);
-        printExpression(expr->expr1,level);
-        printExpression(expr->expr2,level);
+		print(ExprTypeToString(expr->op, BINOP),level + 1,1);
+        printExpression(expr->expr1,level + 1);
+        printExpression(expr->expr2,level + 1);
     }
     else if(expr->type == UNOP){
-        print(ExprTypeToString(expr->op, UNOP),level,1);
-		printExpression(expr->expr1, level);
+        print(ExprTypeToString(expr->op, UNOP),level + 1,1);
+		printExpression(expr->expr1, level + 1);
 	}
 
     else if(expr->type == ID_T)
@@ -149,7 +149,7 @@ void printExpression(Expr *expr, int level){
     else if(expr->type == CALL){
 		print("Call", level + 1, 1);
         print(idIntFormat(0, expr->idLit),level+2, 1);
-        printArgs(expr->argsList,level+1);
+        printArgs(expr->argsList,level);
     }
     else if(expr->type == PARSEINT_T){
 		print("ParseArgs", level + 1, 1);
@@ -208,9 +208,9 @@ char* ExprTypeToString(OpType type, ExprType op)
 	else if(type == EQ)
         temp = "Eq";
     else if(type == LEQ)
-        temp = "Lq";
+        temp = "Leq";
     else if(type == GEQ)
-        temp = "Gq";
+        temp = "Geq";
     else if(type == DOTLENGTH_T)
         temp = "Length";
     else if(type == AND_T)
@@ -219,6 +219,8 @@ char* ExprTypeToString(OpType type, ExprType op)
         temp = "Or";
     else if(type == NOT_)
         temp = "Not";
+	else if(type == DIF)
+        temp = "Neq";
    
 
     return temp;
