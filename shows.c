@@ -107,7 +107,8 @@ void printStatement(Statement *stmt,int level){
     }
     else if(stmt->tipo==WHILE_T){
         printExpression(stmt->expr1,level);
-        printStatement(stmt->stmt1,level + 1);
+		//if(stmt->stmt1 != NULL)
+			printStatement(stmt->stmt1,level + 1);
     }
     else if(stmt->tipo==PRINT_T){
         printExpression(stmt->expr1,level);

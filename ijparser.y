@@ -52,7 +52,7 @@ Class *programa;
 %type <stmtlist>	statement_multi
 %type <stmt>		statement
 %type <expr>		expr exprindex exprnotindex
-%type <argslist> 	args comma_expr_multi
+%type <argslist> 	args argslist
 %type <type>		type_void type
 
 %nonassoc EXPR1REDUCE
@@ -183,12 +183,12 @@ exprnotindex
     ;
 
 args
-	:	expr comma_expr_multi			{$$ = insertArgs($1, $2, 1);}
+	:	expr argslist                {$$=insertArgs($1, $2);}
+    |	expr                         {$$=insertArgs($1, NULL);}
 	;
-	
-comma_expr_multi
-	:	comma_expr_multi COMMA expr		{$$ = insertArgs($3, $1, 0);}
-	|									{$$ = NULL;}
+ 
+argslist
+	:	COMMA args                 {$$=$2;}
 	;
 
 	

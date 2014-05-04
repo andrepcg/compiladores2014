@@ -39,20 +39,18 @@ ParamList* insertFormalParam(Type tipo, char *id, ParamList *lista, int isHead){
 	novo->id = id;
 	novo->next = NULL;
 
-	if(isHead){
+	if(isHead || !lista){
         novo->next = lista;
         return novo;
     }
 
-    if(lista){
-		ParamList* aux = lista;
-		for(; aux->next != NULL; aux = aux->next);
-		aux->next = novo;
 
-		return lista;
-	}
-	else 
-		return novo;
+	ParamList* aux = lista;
+	for(; aux->next != NULL; aux = aux->next);
+	aux->next = novo;
+
+	return lista;
+
 
 }
 
@@ -147,44 +145,31 @@ Statement *insertStatement(StmtType tipo, char* id, StmtList *stmts, Expr *expr,
 }
 
 StmtList *insertListStatement(Statement *stmt, StmtList *lista){
-    StmtList* novo = (StmtList*) malloc(sizeof(StmtList));
-    
-    novo->stmt = stmt;
-    novo->next = NULL;
+    if(!stmt)
+        return lista;
+
+    StmtList* newStmtList = (StmtList*) malloc(sizeof(StmtList));
+    newStmtList->stmt = stmt;
+    newStmtList->next = NULL;
 
     if(lista == NULL)
-        return novo;
-
+        return newStmtList;
 
     StmtList* aux = lista;
     for(; aux->next != NULL; aux = aux->next);
-    aux->next = novo;
+    aux->next = newStmtList;
 
     return lista;
   
 }
 
 
-ArgsList* insertArgs(Expr *expr, ArgsList *lista, int isHead){
+ArgsList* insertArgs(Expr *expr, ArgsList *lista){
 
 	ArgsList *new = (ArgsList*) malloc(sizeof(ArgsList));
 	new->expr = expr;
-	new->next = NULL;
-	
-	if(isHead){
-        new->next = lista;
-        return new;
-    }
+	new->next = lista;
 
-    if(lista){
-		ArgsList* aux = lista;
-		for(; aux->next != NULL; aux = aux->next);
-		aux->next = new;
-
-		return lista;
-	}
-	else 
-		return new;
 	
 }
 
