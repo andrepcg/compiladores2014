@@ -5,14 +5,14 @@
 
 #define INDENT 2
 
+char tmp[40];
+
 void printClass(Class* class){
     printf("Program\n");
     printf("  Id(%s)\n", class->id);
 
     if(class->declaracoes != NULL)
         printDeclList(class->declaracoes);
-    else
-        print("NULL", 1, 1);
 
 }
 
@@ -26,7 +26,8 @@ void printDeclList(DeclList* list)
 			printVarDecl(aux->varDecl->tipo, auxID->id, 0, 1);
 			
 			for(auxID = auxID->next; auxID != NULL; auxID = auxID->next){
-				print(idIntFormat(0, auxID->id), 2, 1);
+				printIndent(2);
+				printf("Id(%s)\n", auxID->id);
 			}
 		}
         else if(aux->tipo == METHODDECL)
@@ -35,13 +36,16 @@ void printDeclList(DeclList* list)
 }
 
 void printMethodDecl(MethodDecl *method){
-	print("MethodDecl", 1, 1);
+	printIndent(1);
+	printf("MethodDecl\n");
 	
-	print(typeToString(method->tipo), 2, 1);
-	print(idIntFormat(0, method->id), 2, 1);
+	printIndent(2);
+	typeToString(method->tipo);
+	
+	printIndent(2);
+	printf("Id(%s)\n", method->id);
 	
 	printMethodParams(method->parametros, 2);
-		
 	printMethodBody(method);
 	
 	
@@ -49,7 +53,9 @@ void printMethodDecl(MethodDecl *method){
 }
 
 void printMethodBody(MethodDecl *method){
-	print("MethodBody", 2, 1);
+
+	printIndent(2);
+	printf("MethodBody\n");
 	
 	if(method->declaracoes != NULL)
 		printMethodDeclarations(method->declaracoes, 3);
@@ -76,8 +82,10 @@ void printMethodDeclarations(VarDeclList *declaracoes,int level){
 		printVarDecl(aux->declaracao->tipo, auxID->id, 0, level);
 		
         for(auxID = auxID->next; auxID != NULL; auxID = auxID->next){
-			print(idIntFormat(0, auxID->id), level + 1, 1);
-            //printVarDecl(aux->declaracao->tipo, auxID->id, 0, level + 1);
+		
+			printIndent(level + 1);
+			printf("Id(%s)\n", auxID->id);
+
         }
 
     }
@@ -86,12 +94,14 @@ void printMethodDeclarations(VarDeclList *declaracoes,int level){
 
 void printStatement(Statement *stmt,int level){
 
+	printIndent(level);
+
 	if(stmt == NULL){
-		print("Null", level, 1);
+		printf("Null\n");
 		return;
 	}
 		
-    print(StmtTypeToString(stmt->tipo),level,1);
+    StmtTypeToString(stmt->tipo);
 	
     if(stmt->tipo==IFELSE){
         printExpression(stmt->expr1,level);
@@ -107,20 +117,22 @@ void printStatement(Statement *stmt,int level){
     }
     else if(stmt->tipo==WHILE_T){
         printExpression(stmt->expr1,level);
-		//if(stmt->stmt1 != NULL)
-			printStatement(stmt->stmt1,level + 1);
+		printStatement(stmt->stmt1,level + 1);
     }
     else if(stmt->tipo==PRINT_T){
         printExpression(stmt->expr1,level);
         
     }
     else if(stmt->tipo==STORE){
-		print(idIntFormat(0, stmt->id),level + 1, 1);
+		printIndent(level + 1);
+		printf("Id(%s)\n", stmt->id);
+
         printExpression(stmt->expr1, level);
 
     }
     else if(stmt->tipo==STOREARRAY){
-		print(idIntFormat(0, stmt->id),level + 1, 1);
+		printIndent(level + 1);
+		printf("Id(%s)\n", stmt->id);
         printExpression(stmt->expr1, level);
         printExpression(stmt->expr2, level);
     }
@@ -128,124 +140,158 @@ void printStatement(Statement *stmt,int level){
 }
 void printExpression(Expr *expr, int level){
 
+	printIndent(level + 1);
+
     if(expr->type == BINOP){
-		print(ExprTypeToString(expr->op, BINOP),level + 1,1);
-        printExpression(expr->expr1,level + 1);
+		ExprTypeToString(expr->op, BINOP);
+		printExpression(expr->expr1,level + 1);
         printExpression(expr->expr2,level + 1);
+		
+
     }
     else if(expr->type == UNOP){
-        print(ExprTypeToString(expr->op, UNOP),level + 1,1);
+		ExprTypeToString(expr->op, UNOP);
 		printExpression(expr->expr1, level + 1);
 	}
 
-    else if(expr->type == ID_T)
-        print(idIntFormat(0, expr->idLit),level+1, 1);
+    else if(expr->type == ID_T){
+		printf("Id(%s)\n", expr->idLit);
+	}
 
-    else if(expr->type == INTLIT_T)
-        print(idIntFormat(1, expr->idLit),level+1, 1);
+    else if(expr->type == INTLIT_T){
+		printf("IntLit(%s)\n", expr->idLit);
+	}
     
-    else if(expr->type == BOOLLIT_T)
-        print(idIntFormat(2, expr->idLit),level+1, 1);
+    else if(expr->type == BOOLLIT_T){
+		printf("BoolLit(%s)\n", expr->idLit);
+	}
     
-    else if(expr->type == CALL){
-		print("Call", level + 1, 1);
-        print(idIntFormat(0, expr->idLit),level+2, 1);
-        printArgs(expr->argsList,level);
+    else if(expr->type == CALL){	
+		printf("Call\n");
+		printIndent(level + 2); printf("Id(%s)\n", expr->idLit);
+		printArgs(expr->argsList,level);
     }
     else if(expr->type == PARSEINT_T){
-		print("ParseArgs", level + 1, 1);
-        print(idIntFormat(0, expr->idLit),level+2, 1);
+		printf("ParseArgs\n");
+        printIndent(level + 2); printf("Id(%s)\n", expr->idLit);
         printExpression(expr->expr1,level+1);
     }
     else if(expr->type == INDEX){
-		print("LoadArray", level + 1, 1);
+		printf("LoadArray\n");
         printExpression(expr->expr1,level+1);
         printExpression(expr->expr2,level+1);
     }
     else if(expr->type == NEWINTARR){
-		print("NewInt", level + 1, 1);
+		printf("NewInt\n");
         printExpression(expr->expr1,level+1);
     }
     else if(expr->type == NEWBOOLARR){
-		print("NewBool", level + 1, 1);
+		printf("NewBool\n");
         printExpression(expr->expr1,level+1);
     }
 }
 
 void printArgs( ArgsList *argsList,int level){
     ArgsList* aux = argsList;
-    for(; aux != NULL; aux = aux->next){
+    for(; aux != NULL; aux = aux->next)
         printExpression(aux->expr,level+1);
 
-    }
 }
 
-char* ExprTypeToString(OpType type, ExprType op)
-{
-    char *temp = (char*) malloc(sizeof(char) * 7);
+void ExprTypeToString(OpType type, ExprType op){
+
     if(type == PLUS){
 		if(op == BINOP)
-			temp = "Add";
+			printf("Add\n");
 		else
-			temp = "Plus";
+			printf("Plus\n");
 			
     }
 	else if(type == MINUS){
         if(op == BINOP)
-			temp = "Sub";
+			printf("Sub\n");
 		else
-			temp = "Minus";
+			printf("Minus\n");
 			
     }else if(type == MUL)
-        temp = "Mul";
+		printf("Mul\n");
+		
     else if(type == DIV)
-        temp = "Div";
+		printf("Div\n");
+		
     else if(type == MOD)
-        temp = "Mod";
+		printf("Mod\n");
+		
     else if(type == LESSER)
-        temp = "Lt";
-    else if(type == GREATER)
-        temp = "Gt";
-	else if(type == EQ)
-        temp = "Eq";
-    else if(type == LEQ)
-        temp = "Leq";
-    else if(type == GEQ)
-        temp = "Geq";
-    else if(type == DOTLENGTH_T)
-        temp = "Length";
-    else if(type == AND_T)
-        temp = "And";
-    else if(type == OR_T)
-        temp = "Or";
-    else if(type == NOT_)
-        temp = "Not";
-	else if(type == DIF)
-        temp = "Neq";
-   
+		printf("Lt\n");
 
-    return temp;
+    else if(type == GREATER)
+		printf("Gt\n");
+
+	else if(type == EQ)
+		printf("Eq\n");
+
+    else if(type == LEQ)
+		printf("Leq\n");
+
+    else if(type == GEQ)
+		printf("Geq\n");
+
+    else if(type == DOTLENGTH_T)
+		printf("Length\n");
+
+    else if(type == AND_T)
+		printf("And\n");
+
+    else if(type == OR_T)
+		printf("Or\n");
+
+    else if(type == NOT_)
+		printf("Not\n");
+
+	else if(type == DIF)
+		printf("Neq\n");
+
  }
 
 void printVarDecl(Type tipo, char *id, int iStatic, int level){
-    print("VarDecl",level, 1);
-	//if(iStatic)
-		//print("Static", level + 1, 1);
-    print(typeToString(tipo), level + 1, 1);
-    print(idIntFormat(0, id), level + 1, 1);
+	printIndent(level);
+    printf("VarDecl\n");
+	
+	printIndent(level + 1);
+	typeToString(tipo);
+	
+	printIndent(level + 1);
+	printf("Id(%s)\n", id);
 
 }
 
 void printMethodParams(ParamList *params, int level){
 
-	print("MethodParams", level, 1);
+	printIndent(level);
+	printf("MethodParams\n");
 	
 	ParamList* aux = params;
     for(; aux != NULL; aux = aux->next){
-		print("ParamDeclaration", level + 1, 1);
-		print(typeToString(aux->tipo), level + 2, 1);
-		print(idIntFormat(0, aux->id), level + 2, 1);
+		printIndent(level + 1);
+		printf("ParamDeclaration\n");
+		
+		printIndent(level + 2);
+		typeToString(aux->tipo);
+		
+		printIndent(level + 2);
+		printf("Id(%s)\n", aux->id);
+
 	}
+}
+
+void printIndent(int level){
+	char spaces[16];
+	int i;
+	for(i = 0; i < INDENT * level; i++){
+		printf(" ", spaces);
+	}
+
 }
 
 void print(char *s, int level, int linebreak){
@@ -259,7 +305,7 @@ void print(char *s, int level, int linebreak){
             spaces[i + 1] = '\0';
 	}
 		
-	printf("%s%s%c", spaces, s, lb);
+	printf("%s%s\n", spaces, s);
 	
 }
 
@@ -280,42 +326,38 @@ char* idIntFormat(int tipo, char *idLit){
 	return tmp;
 }
 
-char* typeToString(Type type)
+void typeToString(Type type)
 {
-	char *temp = (char*) malloc(sizeof(char) * 18);
     if(type == INT_T)
-        temp = "Int";
+		printf("Int\n");
     else if(type == BOOL_T)
-        temp = "Bool";
+		printf("Bool\n");
     else if(type == INTARRAY)
-		temp = "IntArray";
+		printf("IntArray\n");
     else if(type == BOOLARRAY)
-        temp = "BoolArray";
+		printf("BoolArray\n");
     else if(type == VOID_T)
-        temp = "Void";
+		printf("Void\n");
     else if(type == STRINGARRAY)
-        temp = "StringArray";
+		printf("StringArray\n");
 
-	return temp;
 }
 
-char* StmtTypeToString(StmtType type)
+void StmtTypeToString(StmtType type)
 {
-	char *temp = (char*) malloc(sizeof(char) * 13);
     if(type == CSTAT)
-        temp = "CompoundStat";
+		printf("CompoundStat\n");
     else if(type == IFELSE)
-        temp = "IfElse";
+		printf("IfElse\n");
     else if(type == RETURN_T)
-		temp = "Return";
+		printf("Return\n");
     else if(type == WHILE_T)
-        temp = "While";
+		printf("While\n");
     else if(type == PRINT_T)
-        temp = "Print";
+		printf("Print\n");
     else if(type == STORE)
-        temp = "Store";
+		printf("Store\n");
 	else if(type == STOREARRAY)
-        temp = "StoreArray";
+		printf("StoreArray\n");
 
-	return temp;
 }
