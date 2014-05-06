@@ -45,10 +45,12 @@ OBRACE		"{"
 CBRACE		"}"
 OSQUARE		"["
 CSQUARE		"]"
-OP1			("&&"|"||")
-OP2			("<"|">"|"=="|"!="|"<="|">=")
-OP3			("+"|"-")
-OP4			("*"|"/"|"%")
+AND			"&&"
+OR          "||"
+EQUALITY	"=="|"!="
+RELATIONAL	("<"|">"|"<="|">=")
+ADITIVE		("+"|"-")
+MULTIPLICATIVE			("*"|"/"|"%")
 NOT			"!"
 ASSIGN		"="
 SEMIC		";"
@@ -84,10 +86,12 @@ INTLIT		[0-9]+|0x[0-9a-fA-F]+
 {CBRACE}		{colCount(yyleng); return CBRACE;}
 {OSQUARE}		{colCount(yyleng); return OSQUARE;}
 {CSQUARE}		{colCount(yyleng); return CSQUARE;}
-{OP1}			{colCount(yyleng); yylval.token = strdup(yytext); return OP1;}
-{OP2}			{colCount(yyleng); yylval.token = strdup(yytext); return OP2;}
-{OP3}			{colCount(yyleng); yylval.token = strdup(yytext); return OP3;}
-{OP4}			{colCount(yyleng); yylval.token = strdup(yytext); return OP4;}
+{AND}			{colCount(yyleng); yylval.token = strdup(yytext); return AND;}
+{OR}			{colCount(yyleng); yylval.token = strdup(yytext); return OR;}
+{EQUALITY}			{colCount(yyleng); yylval.token = strdup(yytext); return EQUALITY;}
+{RELATIONAL}			{colCount(yyleng); yylval.token = strdup(yytext); return RELATIONAL;}
+{ADITIVE}			{colCount(yyleng); yylval.token = strdup(yytext); return ADITIVE;}
+{MULTIPLICATIVE}			{colCount(yyleng); yylval.token = strdup(yytext); return MULTIPLICATIVE;}
 {NOT}			{colCount(yyleng); yylval.token = strdup(yytext); return NOT;}
 {ASSIGN}		{colCount(yyleng); return ASSIGN;}
 {SEMIC}			{colCount(yyleng); return SEMIC;}
