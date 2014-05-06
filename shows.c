@@ -173,7 +173,8 @@ void printExpression(Expr *expr, int level){
     }
     else if(expr->type == PARSEINT_T){
 		printf("ParseArgs\n");
-        printIndent(level + 2); printf("Id(%s)\n", expr->idLit);
+        printIndent(level + 2);
+		printf("Id(%s)\n", expr->idLit);
         printExpression(expr->expr1,level+1);
     }
     else if(expr->type == INDEX){
