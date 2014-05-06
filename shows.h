@@ -2,6 +2,7 @@
 #define SHOWS_H
 
 #include "structures.h"
+#include "symbol_table.h"
 
 
 void printClass(Class* class);
@@ -21,6 +22,11 @@ void typeToString(Type type);
 void StmtTypeToString(StmtType type);
 void printArgs( ArgsList *argsList,int level);
 void printIndent(int level);
+
+void printSymbolTables(ClassTable*);
+void typeToStringST(Type type, char* dest);
+void printMethodTable(ClassTableEntry* table);
+void printSymbolTables(ClassTable* table);
 
 
 #endif
