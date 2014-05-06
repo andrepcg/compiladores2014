@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "shows.h"
+#include "symbol_table.h"
 
 #define INDENT 2
 
@@ -361,4 +362,72 @@ void StmtTypeToString(StmtType type)
 	else if(type == STOREARRAY)
 		printf("StoreArray\n");
 
+}
+
+////
+// Symbol Tables
+
+void printSymbolTables(ClassTable* table)
+{
+    printf("===== Class %s Symbol Table =====\n", table->id);
+
+    ////
+    // Class Symbol Table.
+    char type[40];
+    ClassTableEntry* aux = table->entries;
+    for(; aux != NULL; aux = aux->next)
+    {
+        if(aux->methodTable == NULL) //Variable
+        {
+            typeToStringST(aux->type, type);
+            printf("%s\t%s\n", aux->id, type);
+        }
+        else //Method
+            printf("%s\tmethod\n", aux->id);
+    }
+
+
+    ////
+    // Method Symbol Tables.
+    aux = table->entries;
+    for(; aux != NULL; aux = aux->next)
+    {
+        if(aux->methodTable != NULL) //Method
+            printMethodTable(aux);
+    }
+}
+
+void printMethodTable(ClassTableEntry* table)
+{
+    char type[40];
+    typeToStringST(table->type, type);
+
+    printf("\n===== Method %s Symbol Table =====\n", table->id);
+    printf("return\t%s\n", type);
+
+    MethodTableEntry* aux = table->methodTable->entries;
+    for(; aux != NULL; aux = aux->next)
+    {
+        typeToStringST(aux->type, type);
+        printf("%s\t%s", aux->id, type);
+        if(aux->isParam)
+            printf("\tparam");
+        printf("\n");
+    }
+}
+
+void typeToStringST(Type type, char* dest)
+{
+    if(type == INT_T)
+        sprintf(dest, "%s", "int");
+    else if(type == BOOL_T)
+        sprintf(dest, "%s", "boolean");
+    else if(type == INTARRAY)
+        sprintf(dest, "%s", "int[]");
+    else if(type == BOOLARRAY)
+        sprintf(dest, "%s", "boolean[]");
+    else if(type == VOID_T)
+        sprintf(dest, "%s", "void");
+    else if(type == STRINGARRAY)
+        sprintf(dest, "%s", "String[]");
 }
