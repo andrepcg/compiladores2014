@@ -40,7 +40,7 @@ Class *programa;
 }
 
 
-%token <token> RESERVED COMMA BOOL INT ID INTLIT IF ELSE WHILE RETURN PRINT BOOLLIT NEW PARSEINT PUBLIC STATIC VOID CLASS OCURV CCURV OBRACE CBRACE OSQUARE CSQUARE OP1 OP2 OP3 OP4 NOT ASSIGN SEMIC STRING DOTLENGTH
+%token <token> RESERVED COMMA BOOL INT ID INTLIT IF ELSE WHILE RETURN PRINT BOOLLIT NEW PARSEINT PUBLIC STATIC VOID CLASS OCURV CCURV OBRACE CBRACE OSQUARE CSQUARE AND OR EQUALITY RELATIONAL ADITIVE MULTIPLICATIVE NOT ASSIGN SEMIC STRING DOTLENGTH
 
 %type <class>		program
 %type <decllist>	program_multi
@@ -59,16 +59,16 @@ Class *programa;
 %nonassoc IF 
 %nonassoc ELSE
 
-%left OP1
-%left OP2
-%left OP3
-%left OP4
+%left OR
+%left AND
+%left EQUALITY
+%left RELATIONAL
+%left ADITIVE
+%left MULTIPLICATIVE
 %right ASSIGN
-%left OSQUARE
 %left OBRACE
-%left NOT
-%left DOTLENGTH
 %right UNARY
+%left OSQUARE DOTLENGTH
 
 %start start
 
@@ -154,27 +154,30 @@ statement_multi
     ;
 	
 expr
-    :   exprindex   %prec EXPR1REDUCE                   {$$=$1;}                  
-    |   exprindex OSQUARE expr CSQUARE                  {$$=insertExpression(INDEX,NULL, NULL,$1,$3,NULL);}                        
-    |   exprnotindex                                    {$$=$1;}
+    :   exprnotindex                                    {$$=$1;}
+	|	exprindex   %prec EXPR1REDUCE                   {$$=$1;}                                  
 	;
     
     
 exprindex
-    :   expr OP1 expr                                   {$$=insertExpression(BINOP, NULL,$2,$1,$3,NULL);}
-    |   expr OP2 expr                                   {$$=insertExpression(BINOP, NULL,$2,$1,$3,NULL);}
-    |   expr OP3 expr                                   {$$=insertExpression(BINOP, NULL,$2,$1,$3,NULL);}
-    |   expr OP4 expr                                   {$$=insertExpression(BINOP, NULL,$2,$1,$3,NULL);}
+	:   exprindex OSQUARE expr CSQUARE                  {$$=insertExpression(INDEX,NULL, NULL,$1,$3,NULL);}   
+    |   expr AND expr                                   {$$=insertExpression(BINOP, NULL,$2,$1,$3,NULL);}
+    |   expr OR expr                                    {$$=insertExpression(BINOP, NULL,$2,$1,$3,NULL);}
+    |   expr EQUALITY expr                              {$$=insertExpression(BINOP, NULL,$2,$1,$3,NULL);}
+    |   expr RELATIONAL expr                            {$$=insertExpression(BINOP, NULL,$2,$1,$3,NULL);}
+    |   expr ADITIVE expr                                   {$$=insertExpression(BINOP, NULL,$2,$1,$3,NULL);}
+    |   expr MULTIPLICATIVE expr                                   {$$=insertExpression(BINOP, NULL,$2,$1,$3,NULL);}
+	|   NOT expr          %prec UNARY                   {$$=insertExpression(UNOP, NULL,$1,$2,NULL,NULL);}
+    |   ADITIVE expr          %prec UNARY                   {$$=insertExpression(UNOP, NULL,$1,$2,NULL,NULL);}
     |	ID												{$$=insertExpression(ID_T, $1, NULL,NULL,NULL,NULL);}
 	|	INTLIT											{$$=insertExpression(INTLIT_T, $1, NULL,NULL,NULL,NULL);}
 	|	BOOLLIT											{$$=insertExpression(BOOLLIT_T, $1, NULL,NULL,NULL,NULL);}
+	|   ID OCURV args CCURV                             {$$=insertExpression(CALL, $1,NULL,NULL,NULL,$3);}
+	|   ID OCURV CCURV                                  {$$=insertExpression(CALL, $1,NULL,NULL,NULL,NULL);}
 	|   OCURV expr CCURV                                {$$=$2;}
     |   expr DOTLENGTH                                  {$$=insertExpression(UNOP, NULL,".length",$1,NULL,NULL);}
-    |   NOT expr          %prec UNARY                   {$$=insertExpression(UNOP, NULL,$1,$2,NULL,NULL);}
-    |   OP3 expr                                        {$$=insertExpression(UNOP, NULL,$1,$2,NULL,NULL);}
     |   PARSEINT OCURV ID OSQUARE expr CSQUARE CCURV    {$$=insertExpression(PARSEINT_T, $3,NULL,$5,NULL,NULL);}
-    |   ID OCURV CCURV                                  {$$=insertExpression(CALL, $1,NULL,NULL,NULL,NULL);}
-    |   ID OCURV args CCURV                             {$$=insertExpression(CALL, $1,NULL,NULL,NULL,$3);}
+
     ;
 
 exprnotindex
@@ -183,8 +186,9 @@ exprnotindex
     ;
 
 args
-	:	expr argslist                {$$=insertArgs($1, $2);}
-    |	expr                         {$$=insertArgs($1, NULL);}
+	:	expr                         {$$=insertArgs($1, NULL);}
+	|	expr argslist                {$$=insertArgs($1, $2);}
+  
 	;
  
 argslist
@@ -196,6 +200,7 @@ argslist
 
 int main(int argc, char *argv[])
 {
+
 	yyparse();
 
 	int i, printTree, printSymbols;
