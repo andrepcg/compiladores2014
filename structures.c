@@ -170,7 +170,7 @@ ArgsList* insertArgs(Expr *expr, ArgsList *lista){
 	new->expr = expr;
 	new->next = lista;
 
-	
+	return new;
 }
 
 Expr *insertExpression(ExprType type, char *idLit, char *op, Expr *expr1, Expr *expr2, ArgsList *argsList){

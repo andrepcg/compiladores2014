@@ -18,6 +18,7 @@ void yyerror(char *s);
 int yylex(void);
 
 Class *programa;
+ClassTable* symbolsTable = NULL;
 
 %}
 
@@ -217,12 +218,14 @@ int main(int argc, char *argv[])
 		}
 	}
 	
+	symbolsTable = buildSymbolsTables(programa);
+	
 	
 	if(printTree && erros == 0)
 		printClass(programa);
-		/*
-	if(printSymbols)
-		printSymbolTables(symbolsTable);*/
+		
+	else if(printSymbols && erros == 0)
+		printSymbolTables(symbolsTable);
 
 	//freeProgram(myProgram, symbolsTable);
     return 0;
