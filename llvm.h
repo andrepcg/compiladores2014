@@ -24,6 +24,16 @@ typedef struct _array
 
 } Array;
 
+typedef struct _argTemp{
+	char *id;
+	Type tipo;
+	int tempVar;
+	struct _argTemp *next;
+} TempArg;
+
+TempArg *getTempArg(char* id);
+void createTempArg(char *id, Type tipo, int tempVar);
+
 Array *getArray(char* id);
 void createArray(char *id, char *tipo, int size);
 

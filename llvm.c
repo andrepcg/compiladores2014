@@ -9,6 +9,7 @@
 MethodTable* currentLocalTable;
 
 Type curFunctionType;
+int curFunctionisMain;
 int varNumber, ifNumber, whileNumber, indexNumber;
 
 
@@ -19,6 +20,7 @@ char* llvmRetTypes[6] = {"void", "i32", "i1", "{i32, i32*}", "{i32, i1*}", "i8**
 char *nome;
 int returned = 0;
 Array *arraysList;
+TempArg *argumentosTemporarios;
 
 void generateLLVM(Class* programa)
 {
@@ -67,32 +69,44 @@ void genGlobalVar(VarDecl* varDecl)
 void genMethod(MethodDecl* methodDecl)
 {
     curFunctionType = methodDecl->tipo;
+	
+	curFunctionisMain = (strcmp(methodDecl->id, "main") == 0) ? 1 : 0;
+
     varNumber = ifNumber = whileNumber = indexNumber = 1;
     currentLocalTable = getLocalTable(methodDecl->id);
 
-    char llvmType[MAX_LLVM_TYPE_SIZE];
-    getRetTypeLLVM(llvmType, methodDecl->tipo);
 
-    printf("define %s @%s(", llvmType, methodDecl->id);
+    printf("define %s @%s(", llvmRetTypes[methodDecl->tipo], methodDecl->id);
 
     ParamList* aux = methodDecl->parametros;
     if(aux != NULL)
     {
-        getTypeLLVM(llvmType, aux->tipo);
         if(aux->tipo == INTARRAY || aux->tipo == BOOLARRAY || aux->tipo == STRINGARRAY)
             printf("i32 %%.%s, ", aux->id);
-        printf("%s %%%s", llvmType, aux->id);
+        printf("%s %%%s", llvmTypes[aux->tipo], aux->id);
         aux = aux->next;
     }
     for(; aux != NULL; aux = aux->next)
     {
-        getTypeLLVM(llvmType, aux->tipo);
         if(aux->tipo == INTARRAY || aux->tipo == BOOLARRAY || aux->tipo == STRINGARRAY)
             printf(", i32 %%.%s", aux->id);
-        printf(", %s %%%s", llvmType, aux->id);
+        printf(", %s %%%s", llvmTypes[aux->tipo], aux->id);
     }
 
     printf(")\n{\n");
+	
+	//if(!curFunctionisMain){
+		aux = methodDecl->parametros;
+		for(; aux != NULL; aux = aux->next){
+			createTempArg(aux->id, aux->tipo, varNumber++);
+
+			printf("\t%%%d = alloca %s\n", varNumber - 1, llvmTypes[aux->tipo]);
+			printf("\tstore %s %%%s, %s %%%d\n", llvmTypes[aux->tipo], aux->id, llvmTypes[aux->tipo + 2], varNumber - 1);
+
+		}
+	//}
+	
+	//printf("Arg %s %d\n", argumentosTemporarios->id, argumentosTemporarios->tempVar);
 
     VarDeclList* aux2 = methodDecl->declaracoes;
     for(; aux2 != NULL; aux2 = aux2->next)
@@ -101,7 +115,10 @@ void genMethod(MethodDecl* methodDecl)
     genStmtList(methodDecl->stmts);
 	
 	if(!returned)
-		printf("\tret void\n");
+		//if(curFunctionisMain)
+			//printf("\tret i32 0\n");
+		//else
+			printf("\tret void\n");
 
 
     printf("}\n\n");
@@ -163,9 +180,10 @@ void genStmt(Statement* stmt)
     }
     else if(stmt->tipo == RETURN_T)
     {
+	
         if(stmt->expr1 != NULL)
         {
-            char llvmType[MAX_LLVM_TYPE_SIZE];
+
             int exprVarNumber = genExpr(stmt->expr1);
 			char varType;
 			
@@ -183,7 +201,8 @@ void genStmt(Statement* stmt)
             
         }
         else
-            printf("\t ret void\n");
+			printf("\tret void\n");
+		
 			
 		returned = 1;
     }
@@ -210,6 +229,7 @@ void genStmt(Statement* stmt)
 		}
 		
 		
+		
 		if(t == BOOL_T || (stmt->expr1->expr1 != NULL && (strcmp(stmt->expr1->expr1->idLit, "true") == 0 || strcmp(stmt->expr1->expr1->idLit, "false") == 0))){
 			printf("\t%%%d = zext i1 %%%d to i32\n", varNumber++, ret);
 			printf("\t%%%d = getelementptr inbounds [2 x i8*]* @%s, i32 0, i32 %%%d\n", varNumber++, stmt->id, varNumber-1);
@@ -218,7 +238,7 @@ void genStmt(Statement* stmt)
 
 		}
 		else
-			printf("\tcall i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str2, i32 0, i32 0), i32 %%%d)\n", ret);
+			printf("\tcall i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str0, i32 0, i32 0), i32 %%%d)\n", ret);
 
 	}
     else if(stmt->tipo == STORE)
@@ -273,13 +293,13 @@ void genStmt(Statement* stmt)
 
         if(stmt->expr1->type==INTLIT_T ||stmt->expr1->type==BOOLLIT_T ){
 			if(var != NULL)
-				printf("\t%%ind%d = getelementptr [%d x %s]* %s%s, i32 0, i32 %d\n", indexNumber, var->size, var->tipo, varDeclSymbol, stmt->id, indexVarNumber);
+				printf("\t%%ind%d = getelementptr inbounds [%d x %s]* %s%s, i32 0, i32 %d\n", indexNumber, var->size, var->tipo, varDeclSymbol, stmt->id, indexVarNumber);
 			else
-				printf("\t%%ind%d = getelementptr %s %s%s, i32 %d\n", indexNumber, llvmTypes[arrayType], varDeclSymbol, stmt->id, indexVarNumber);
+				printf("\t%%ind%d = getelementptr inbounds %s %s%s, i32 %d\n", indexNumber, llvmTypes[arrayType], varDeclSymbol, stmt->id, indexVarNumber);
         
 		}
 		else
-            printf("\t%%ind%d = getelementptr %s %s%s, i32 %%%d\n", indexNumber, llvmTypes[arrayType], varDeclSymbol, stmt->id, indexVarNumber);
+            printf("\t%%ind%d = getelementptr inbounds %s %s%s, i32 %%%d\n", indexNumber, llvmTypes[arrayType], varDeclSymbol, stmt->id, indexVarNumber);
        
 		if(stmt->expr2->type==INTLIT_T ||stmt->expr2->type==BOOLLIT_T )
 			printf("\tstore %s %d, %s %%ind%d\n", llvmTypes[arrayType - 2], exprVarNumber, llvmTypes[arrayType], indexNumber);
@@ -375,19 +395,26 @@ int genExpr(Expr* expr)
     }
     else if(expr->type == ID_T)
     {
-        Type varType = getSymbolFromGlobal(expr->idLit);
+		TempArg *arg = getTempArg(expr->idLit);
 
-		int local = 0;
-		if(varType == -1) {
-			varType = getSymbolFromLocal(expr->idLit);
-			local = 1;
+		if(arg == NULL){
+			Type varType = getSymbolFromGlobal(expr->idLit);
+			int local = 0;
+			if(varType == -1) {
+				varType = getSymbolFromLocal(expr->idLit);
+				local = 1;
+			}
+
+			if(varType != INTARRAY && varType != BOOLARRAY){
+				printf("\t%%%d = load %s %c%s\n", varNumber++, llvmTypes[varType], (local == 1) ? '%' : '@' ,expr->idLit);
+				
+			}
 		}
-		printf("ID1 VarNumber: %d\n", varNumber);
-        if(varType != INTARRAY && varType != BOOLARRAY)
-            printf("\t%%%d = load i32* %c%s\n", varNumber, (local == 1) ? '%' : '@' ,expr->idLit);
-		printf("ID2 VarNumber: %d\n", varNumber);	
-		returnValue = varNumber++;
-		printf("ID3 VarNumber: %d\n", varNumber);
+		else{
+			printf("\t%%%d = load %s %%%d\n", varNumber++, llvmTypes[arg->tipo + 2], arg->tempVar);
+		}
+		
+		returnValue = varNumber;
     }
 
     else if(expr->type == NEWINTARR || expr->type == NEWBOOLARR) {
@@ -530,7 +557,7 @@ int genExpr(Expr* expr)
   
 		leftExprId = genExpr(expr->expr1);
 		rightExprId = genExpr(expr->expr2);
-		int isLocal;
+		int isLocal = 1;
 		char varDeclSymbol[5];
 		
 		Type arrayType = getSymbolFromLocal(expr->expr1->idLit);
@@ -541,35 +568,30 @@ int genExpr(Expr* expr)
 		
 		Array *var = getArray(expr->expr1->idLit);
 
-        sprintf(varDeclSymbol, isLocal ? "%%" : "@");
+        //sprintf(varDeclSymbol, isLocal ? "%%" : "@");
 
 		returnValue = varNumber++;
         if(expr->expr2->type == INTLIT_T || expr->expr2->type == BOOLLIT_T ){
+			
 			if(var != NULL)
-				printf("\t%%%d = getelementptr inbounds [%d x %s]* %s%s, i32 0, i32 %d\n", returnValue, var->size, var->tipo, varDeclSymbol, expr->expr1->idLit, rightExprId);
+				printf("\t%%%d = getelementptr inbounds [%d x %s]* %c%s, i32 0, i32 %d\n", returnValue, var->size, var->tipo, (isLocal == 1) ? '%' : '@', expr->expr1->idLit, rightExprId);
 			else
 				printf("\t%%%d = getelementptr inbounds %s %s%s, i32 0, i32 %d\n", returnValue, llvmTypes[arrayType], varDeclSymbol, expr->expr1->idLit, rightExprId);
         
 		}
 		else{
 			if(var != NULL)
-				printf("\t%%%d = getelementptr inbounds [%d x %s]* %s%s, i32 0, i32 %%%d\n", returnValue, var->size, var->tipo, varDeclSymbol, expr->expr1->idLit, rightExprId);
+				printf("\t%%%d = getelementptr inbounds [%d x %s]* %s%s, i32 0, i32 %%%d\n", returnValue, var->size, var->tipo, varDeclSymbol, expr->expr1->idLit, rightExprId - 1);
 			else
-				printf("\t%%%d = getelementptr inbounds %s %s%s, i32 %%%d\n", returnValue, llvmTypes[arrayType], varDeclSymbol, expr->expr1->idLit, rightExprId);
+				printf("\t%%%d = getelementptr inbounds %s %s%s, i32 %%%d\n", returnValue, llvmTypes[arrayType], varDeclSymbol, expr->expr1->idLit, rightExprId -1);
 		
 		}
 		
-		/*
-		if(expr->expr2->type==INTLIT_T || expr->expr2->type==BOOLLIT_T )
-			printf("\t%%%d = getelementptr inbounds i32* %%%d, i32 0, i32 %d\n", returnValue, leftExprId, rightExprId);
-		else
-			printf("\t%%%d = getelementptr inbounds i32* %%%d, i32 0, i32 %%%d\n", returnValue, leftExprId, rightExprId);
-			*/
+
 		printf("\t%%%d = load i32* %%%d\n", varNumber, returnValue);
 		returnValue = varNumber++;
     }
-    
-	printf("RET VarNumber: %d\n", varNumber);
+
 	return returnValue;
 }
 
@@ -610,4 +632,32 @@ void createArray(char *id, char *tipo, int size){
 		tail->next = a;
 		
 	//printf("Arrayteste: %s %d %s\n", arraysList->id, arraysList->size, arraysList->tipo);
+}
+
+TempArg *getTempArg(char* id)
+{
+    TempArg* aux = argumentosTemporarios;
+    for(; aux != NULL; aux = aux->next){
+        if(strcmp(id, aux->id) == 0){
+            return aux;
+		}
+    }
+
+    return NULL;
+}
+
+void createTempArg(char *id, Type tipo, int tempVar){
+	TempArg *tail = argumentosTemporarios;
+    for(; (tail != NULL) && (tail->next != NULL); tail = tail->next);
+	
+	TempArg *a = (TempArg*) malloc(sizeof(TempArg));
+	a->id = id;
+	a->tipo = tipo;
+	a->tempVar = tempVar;
+	a->next = NULL;
+	
+	if(argumentosTemporarios == NULL)
+		argumentosTemporarios = a;
+	else
+		tail->next = a;
 }
