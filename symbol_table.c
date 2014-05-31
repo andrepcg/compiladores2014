@@ -5,13 +5,7 @@
 ////
 // Functions for symbol finding.
 extern ClassTable* symbolsTable;
-MethodTable* currentLocalTable;
-
-Type getSymbol(char*, int);
-Type getSymbolFromGlobal(char*);
-Type getSymbolFromLocal(char*);
-Type getSymbolFromLocalOrGlobal(char*);
-MethodTable* getLocalTable(char*);
+extern MethodTable* currentLocalTable;
 
 ////
 // Semantic errors functions.
@@ -35,6 +29,7 @@ ClassTable* buildSymbolsTables(Class* myProgram)
     for(; aux != NULL; aux = aux->next)
     {
         ClassTableEntry* newEntry = (ClassTableEntry*) malloc(sizeof(ClassTableEntry));
+        newEntry->id = NULL;
         newEntry->methodTable = NULL;
         newEntry->next = NULL;
         end = newEntry;
@@ -58,7 +53,7 @@ ClassTable* buildSymbolsTables(Class* myProgram)
 ClassTableEntry* newVarEntries(VarDecl* decl, ClassTableEntry* tableEntry)
 {
     char* id = decl->idList->id;
-    if(getSymbolFromGlobal(id) != -1)
+    if(getSymbol(id) != -1)
         errorAlreadyDefined(id);
 
     tableEntry->id = id;
@@ -69,7 +64,7 @@ ClassTableEntry* newVarEntries(VarDecl* decl, ClassTableEntry* tableEntry)
     IDList* aux = decl->idList->next;
     for(; aux != NULL; aux = aux->next)
     {
-        if(getSymbolFromGlobal(aux->id) != -1)
+        if(getSymbol(aux->id) != -1)
             errorAlreadyDefined(aux->id);
 
         ClassTableEntry* newEntry = (ClassTableEntry*) malloc(sizeof(ClassTableEntry));
@@ -93,7 +88,7 @@ void newMethodEntry(MethodDecl* decl, ClassTableEntry* tableEntry, ClassTable* b
 {
     char* id = decl->id;
 
-    if(getSymbolFromGlobal(id) != -1)
+    if(getSymbol(id) != -1)
         errorAlreadyDefined(id);
 
     tableEntry->id = decl->id;
@@ -148,11 +143,17 @@ void newMethodTable(MethodTable* methodTable, ParamList* params, VarDeclList* de
         newEntry->id = id;
         newEntry->type = aux->declaracao->tipo;
         newEntry->isParam = 0;
-        newEntry->next = NULL;
+        newEntry->next = NULL;        
+
+        if(methodTable->entries == NULL)
+            methodTable->entries = newEntry;
+        else
+            last->next = newEntry;
 
         MethodTableEntry* last2 = newEntry;
         IDList* aux2 = aux->declaracao->idList->next;
-        for(; aux2 != NULL; aux2 = aux2->next){
+        for(; aux2 != NULL; aux2 = aux2->next)
+        {
             if(getSymbolFromLocal(aux2->id) != -1)
                 errorAlreadyDefined(aux2->id);
 
@@ -167,24 +168,34 @@ void newMethodTable(MethodTable* methodTable, ParamList* params, VarDeclList* de
         }
         end = last2;
 
-
-        if(methodTable->entries == NULL)
-            methodTable->entries = newEntry;
-        else
-            last->next = newEntry;
-
         last = end;
     }
 }
 
 ////
 // Functions for symbol finding.
-Type getSymbol(char* id, int isMethod)
+Type getSymbol(char* id)
 {
-    if(isMethod)
-        return getSymbolFromGlobal(id);
-    else
-        return getSymbolFromLocal(id);
+    ClassTableEntry* aux = symbolsTable->entries;
+    for(; aux != NULL; aux = aux->next)
+    {
+        if(aux->id && (strcmp(id, aux->id) == 0))
+            return aux->type;
+    }
+
+    return -1;
+}
+
+Type getMethodFromGlobal(char* id)
+{
+    ClassTableEntry* aux = symbolsTable->entries;
+    for(; aux != NULL; aux = aux->next)
+    {
+        if(aux->id && aux->methodTable && (strcmp(id, aux->id) == 0))
+            return aux->type;
+    }
+
+    return -1;
 }
 
 Type getSymbolFromGlobal(char* id)
@@ -192,7 +203,7 @@ Type getSymbolFromGlobal(char* id)
     ClassTableEntry* aux = symbolsTable->entries;
     for(; aux != NULL; aux = aux->next)
     {
-        if(aux->id && strcmp(id, aux->id) == 0)
+        if(aux->id && !aux->methodTable && (strcmp(id, aux->id) == 0))
             return aux->type;
     }
 
@@ -204,7 +215,7 @@ Type getSymbolFromLocal(char* id)
     MethodTableEntry* aux = currentLocalTable->entries;
     for(; aux != NULL; aux = aux->next)
     {
-        if(aux->id && strcmp(id, aux->id) == 0)
+        if(aux->id && (strcmp(id, aux->id) == 0))
             return aux->type;
     }
 
@@ -232,8 +243,20 @@ MethodTable* getLocalTable(char* id)
     return NULL;
 }
 
+ClassTableEntry* getClassTableEntry(char* id)
+{
+    ClassTableEntry* aux = symbolsTable->entries;
+    for(; aux != NULL; aux = aux->next)
+    {
+        if(strcmp(id, aux->id) == 0)
+            return aux;
+    }
+
+    return NULL;
+}
+
 void errorAlreadyDefined(char* id)
 {
     printf("Symbol %s already defined\n", id);
-    exit(-1);
+    exit(0);
 }

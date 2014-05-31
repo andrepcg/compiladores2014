@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "structures.h"
 #include "shows.h"
+#include "llvm.h"
 
 
 extern int prevLineNo;
@@ -226,6 +227,9 @@ int main(int argc, char *argv[])
 		
 	else if(printSymbols && erros == 0)
 		printSymbolTables(symbolsTable);
+		
+	else if(erros == 0)
+		generateLLVM(programa);
 
 	//freeProgram(myProgram, symbolsTable);
     return 0;

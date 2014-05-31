@@ -1,4 +1,4 @@
 all:
-	lex ijparser.l
+	flex ijparser.l
 	yacc --defines=y.tab.h ijparser.y
-	gcc -o ijparser *.c -ll -ly -g
+	gcc -o llvm *.c -lfl -ly -g
