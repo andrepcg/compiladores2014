@@ -204,6 +204,9 @@ int main(int argc, char *argv[])
 {
 
 	yyparse();
+	
+	if(erros)
+		exit(0);
 
 	int i, printTree, printSymbols;
 	printTree = printSymbols = 0;
@@ -222,13 +225,13 @@ int main(int argc, char *argv[])
 	symbolsTable = buildSymbolsTables(programa);
 	
 	
-	if(printTree && erros == 0)
+	if(printTree)
 		printClass(programa);
 		
-	else if(printSymbols && erros == 0)
+	else if(printSymbols)
 		printSymbolTables(symbolsTable);
 		
-	else if(erros == 0)
+	else
 		generateLLVM(programa);
 
 	//freeProgram(myProgram, symbolsTable);

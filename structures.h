@@ -92,18 +92,18 @@ typedef struct _class {
 	DeclList *declaracoes;
 } Class;
 
-Class* criarClasse(char *id, DeclList *declaracoes);
-DeclList* inserirDecl(DeclType type, void* decl, DeclList* list);
-ParamList* inserirFormalParam(Type tipo, char *id, ParamList *lista, int isHead);
-IDList* inserirListaID(char *id, IDList *listaIDs);
-VarDecl* inserirDeclVar(Type tipo, char *id, IDList *listaIDs, int iStatic);
+Class* createClass(char *id, DeclList *declaracoes);
+DeclList* insertDecl(DeclType type, void* decl, DeclList* list);
+ParamList* insertFormalParam(Type tipo, char *id, ParamList *lista, int isHead);
+IDList* insertIDList(char *id, IDList *listaIDs);
+VarDecl* insertVarDecl(Type tipo, char *id, IDList *listaIDs, int iStatic);
 VarDecl* setStatic(void *vardecl, int a);
-VarDeclList* inserirListaDeclVar(VarDecl *vardecl, VarDeclList *listaDecl);
-Expr *inserirExpressao(ExprType type, char *idLit, char *op, Expr *expr1, Expr *expr2, ArgsList *argsList);
+VarDeclList* insertVarDeclList(VarDecl *vardecl, VarDeclList *listaDecl);
+Expr *insertExpression(ExprType type, char *idLit, char *op, Expr *expr1, Expr *expr2, ArgsList *argsList);
 OpType checkOP(char *op);
-ArgsList* inserirArgs(Expr *expr, ArgsList *lista);
-StmtList *inserirListaStatements(Statement *stmt,StmtList *lista);
-Statement *inserirStatement(StmtType tipo, char* id, StmtList *stmts,Expr *expr,Expr *expr2,Statement *stmt1,Statement *stmt2);
-MethodDecl* inserirDeclMetodo(Type tipo, char *id, ParamList *parametros, VarDeclList *declaracoes, StmtList *stmts);
+ArgsList* insertArgs(Expr *expr, ArgsList *lista);
+StmtList *insertListStatement(Statement *stmt,StmtList *lista);
+Statement *insertStatement(StmtType tipo, char* id, StmtList *stmts,Expr *expr,Expr *expr2,Statement *stmt1,Statement *stmt2);
+MethodDecl* insertMethodDecl(Type tipo, char *id, ParamList *parametros, VarDeclList *declaracoes, StmtList *stmts);
 
 #endif
