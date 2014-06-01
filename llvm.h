@@ -11,7 +11,7 @@ void genStmtList(StmtList*);
 void genStmt(Statement*);
 int buildExpression(Expr*,int,int,char*);
 int genExpr(Expr*);
-void getExprType(char* llvmType, Expr* expr);
+void getExprType(char* llvmType, ExprType type);
 void getTypeLLVM(char*, Type);
 void getRetTypeLLVM(char*, Type);
 
@@ -36,5 +36,7 @@ void createTempArg(char *id, Type tipo, int tempVar);
 
 Array *getArray(char* id);
 void createArray(char *id, char *tipo, int size);
+
+Type getExprVarType(Expr *expr);
 
 #endif
