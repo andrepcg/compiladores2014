@@ -162,7 +162,6 @@ void genStmtList(StmtList* list)
 }
 
 Type getExprVarType(Expr *expr){
-	//printf("Tipo: %d | idLit: %s\n", expr->type, (expr->idLit != NULL) ? expr->idLit : "null");
 	Type tipo = 1;
 	if(expr->type == BOOLLIT_T)
 		tipo = BOOL_T;
@@ -172,6 +171,8 @@ Type getExprVarType(Expr *expr){
 		tipo = getSymbolFromLocalOrGlobal(expr->idLit);
 	else if(expr->expr1 != NULL)
 		tipo = getExprVarType(expr->expr1);
+	else
+		tipo = INTARRAY;
 		
 	return tipo;
 }
@@ -283,7 +284,7 @@ void genStmt(Statement* stmt)
     {
         int isLocal = 1;
         char varDeclSymbol[5];
-        char exprType[20];
+       // char exprType[20];
 
         if(stmt->expr1->type==NEWINTARR || stmt->expr1->type==NEWBOOLARR)
             nome=stmt->id;
@@ -299,13 +300,12 @@ void genStmt(Statement* stmt)
 
         sprintf(varDeclSymbol, isLocal ? "%%" : "@");
 
-		getExprType(exprType,stmt->expr1->type);
+		//getExprType(exprType,stmt->expr1->type);
 		Type t = getExprVarType(stmt->expr1);
-		//printf("Expressao: %d\n", getExprVarType(stmt->expr1));
 		
         if(stmt->expr1->type != NEWINTARR && stmt->expr1->type != NEWBOOLARR){
             if(stmt->expr1->type == INTLIT_T || stmt->expr1->type == BOOLLIT_T )
-                printf("\tstore %s %d, %s* %s%s\n", exprType, exprVarNumber, llvmTypes[varType], varDeclSymbol, stmt->id);
+                printf("\tstore %s %d, %s* %s%s\n", llvmTypes[t], exprVarNumber, llvmTypes[varType], varDeclSymbol, stmt->id);
             else
 				printf("\tstore %s %%%d, %s* %s%s\n", llvmTypes[t], (stmt->expr1->type == PARSEINT_T) ? exprVarNumber - 1 : exprVarNumber, llvmTypes[varType], varDeclSymbol, stmt->id);
 
@@ -544,16 +544,18 @@ int genExpr(Expr* expr)
     }
 
     else if(expr->type == NEWINTARR || expr->type == NEWBOOLARR) {
-		char exprType[20];
-        getExprType(exprType,expr->expr1->type);
+		//char exprType[20];
+        //getExprType(exprType,expr->expr1->type);
+		Type t = getExprVarType(stmt->expr1);
+		
 		returnValue = genExpr(expr->expr1);
 		
         if(expr->expr1->type==INTLIT_T || expr->expr1->type==BOOLLIT_T){
-            printf("\t%%%s = alloca [%d x %s]\n",nome,returnValue,exprType);
+            printf("\t%%%s = alloca [%d x %s]\n", nome, returnValue, llvmTypes[t]);
 			createArray(nome, exprType, returnValue);
         }
 		else{
-            printf("\t%%%s = alloca [%%%d x %s]\n",nome,returnValue,exprType);
+            printf("\t%%%s = alloca [%%%d x %s]\n", nome, returnValue, llvmTypes[t]);
 		}
     }
     else if(expr->type == INTLIT_T)
